@@ -252,7 +252,7 @@ DOXYGEN_EXECUTABLE:FILEPATH=DOXYGEN_EXECUTABLE-NOTFOUND
 FREERTOS_KERNEL_PATH:PATH=/Users/KuangYi/Desktop/EmbeddedSystems/pico/FreeRTOS-Kernel
 
 //Value Computed by CMake
-FreeRTOS-Kernel_BINARY_DIR:STATIC=/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/src/lab5/rtos/freertos/FREERTOS_KERNEL
+FreeRTOS-Kernel_BINARY_DIR:STATIC=/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/Project/FREERTOS_KERNEL
 
 //Value Computed by CMake
 FreeRTOS-Kernel_IS_TOP_LEVEL:STATIC=OFF
@@ -459,7 +459,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=88
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=85
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -523,10 +523,6 @@ PICO_PLATFORM_CMAKE_FILE:INTERNAL=/Users/KuangYi/Desktop/EmbeddedSystems/pico/pi
 //Enable build of SDK tests
 PICO_SDK_TESTS_ENABLED:INTERNAL=
 PICO_TOOLCHAIN_PATH:INTERNAL=
-//WiFi password for examples
-WIFI_PASSWORD:INTERNAL=lsps353ycss
-//WiFi SSID for examples
-WIFI_SSID:INTERNAL=Poh
 //Compiler reason failure
 _Python3_Compiler_REASON_FAILURE:INTERNAL=
 //Development reason failure

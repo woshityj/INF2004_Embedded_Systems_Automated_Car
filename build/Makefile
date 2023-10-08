@@ -191,7 +191,7 @@ lab5_nosys: cmake_check_build_system
 
 # fast build rule for target.
 lab5_nosys/fast:
-	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/build.make src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/build
+	$(MAKE) $(MAKESILENT) -f Project/Source/CMakeFiles/lab5_nosys.dir/build.make Project/Source/CMakeFiles/lab5_nosys.dir/build
 .PHONY : lab5_nosys/fast
 
 #=============================================================================
@@ -204,7 +204,7 @@ ELF2UF2Build: cmake_check_build_system
 
 # fast build rule for target.
 ELF2UF2Build/fast:
-	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/build.make src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/build
+	$(MAKE) $(MAKESILENT) -f Project/Source/CMakeFiles/ELF2UF2Build.dir/build.make Project/Source/CMakeFiles/ELF2UF2Build.dir/build
 .PHONY : ELF2UF2Build/fast
 
 #=============================================================================
@@ -217,7 +217,7 @@ lab5_sys: cmake_check_build_system
 
 # fast build rule for target.
 lab5_sys/fast:
-	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/build.make src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/build
+	$(MAKE) $(MAKESILENT) -f Project/Source/CMakeFiles/lab5_sys.dir/build.make Project/Source/CMakeFiles/lab5_sys.dir/build
 .PHONY : lab5_sys/fast
 
 #=============================================================================
@@ -230,7 +230,7 @@ picow_tls_client_background: cmake_check_build_system
 
 # fast build rule for target.
 picow_tls_client_background/fast:
-	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/build.make src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/build
+	$(MAKE) $(MAKESILENT) -f Project/tls_client/CMakeFiles/picow_tls_client_background.dir/build.make Project/tls_client/CMakeFiles/picow_tls_client_background.dir/build
 .PHONY : picow_tls_client_background/fast
 
 #=============================================================================
@@ -243,7 +243,7 @@ picow_tls_client_poll: cmake_check_build_system
 
 # fast build rule for target.
 picow_tls_client_poll/fast:
-	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/build.make src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/build
+	$(MAKE) $(MAKESILENT) -f Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/build.make Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/build
 .PHONY : picow_tls_client_poll/fast
 
 #=============================================================================
@@ -256,7 +256,7 @@ picow_tls_verify_background: cmake_check_build_system
 
 # fast build rule for target.
 picow_tls_verify_background/fast:
-	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/build.make src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/build
+	$(MAKE) $(MAKESILENT) -f Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/build.make Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/build
 .PHONY : picow_tls_verify_background/fast
 
 # Help Target
