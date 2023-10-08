@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build"
+		},
+		{
+			"file" : "/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.rule"
+		},
+		{
+			"file" : "/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build-complete.rule"
+		},
+		{
+			"file" : "/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/src/lab5/rtos/freertos/lab5/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-build.rule"
+		},
+		{
+			"file" : "/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/src/lab5/rtos/freertos/lab5/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-configure.rule"
+		},
+		{
+			"file" : "/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/src/lab5/rtos/freertos/lab5/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-download.rule"
+		},
+		{
+			"file" : "/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/src/lab5/rtos/freertos/lab5/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-install.rule"
+		},
+		{
+			"file" : "/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/src/lab5/rtos/freertos/lab5/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-mkdir.rule"
+		},
+		{
+			"file" : "/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/src/lab5/rtos/freertos/lab5/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-patch.rule"
+		},
+		{
+			"file" : "/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/src/lab5/rtos/freertos/lab5/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"ELF2UF2Build"
+		],
+		"name" : "ELF2UF2Build"
+	}
+}

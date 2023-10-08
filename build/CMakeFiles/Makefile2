@@ -64,92 +64,18 @@ CMAKE_BINARY_DIR = /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Syste
 
 # The main recursive "all" target.
 all: pico-sdk/all
-all: Project/all
+all: src/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
 preinstall: pico-sdk/preinstall
-preinstall: Project/preinstall
+preinstall: src/preinstall
 .PHONY : preinstall
 
 # The main recursive "clean" target.
 clean: pico-sdk/clean
-clean: Project/clean
+clean: src/clean
 .PHONY : clean
-
-#=============================================================================
-# Directory level rules for directory Project
-
-# Recursive "all" directory target.
-Project/all: Project/FREERTOS_KERNEL/all
-Project/all: Project/Source/all
-Project/all: Project/tls_client/all
-.PHONY : Project/all
-
-# Recursive "preinstall" directory target.
-Project/preinstall: Project/FREERTOS_KERNEL/preinstall
-Project/preinstall: Project/Source/preinstall
-Project/preinstall: Project/tls_client/preinstall
-.PHONY : Project/preinstall
-
-# Recursive "clean" directory target.
-Project/clean: Project/FREERTOS_KERNEL/clean
-Project/clean: Project/Source/clean
-Project/clean: Project/tls_client/clean
-.PHONY : Project/clean
-
-#=============================================================================
-# Directory level rules for directory Project/FREERTOS_KERNEL
-
-# Recursive "all" directory target.
-Project/FREERTOS_KERNEL/all:
-.PHONY : Project/FREERTOS_KERNEL/all
-
-# Recursive "preinstall" directory target.
-Project/FREERTOS_KERNEL/preinstall:
-.PHONY : Project/FREERTOS_KERNEL/preinstall
-
-# Recursive "clean" directory target.
-Project/FREERTOS_KERNEL/clean:
-.PHONY : Project/FREERTOS_KERNEL/clean
-
-#=============================================================================
-# Directory level rules for directory Project/Source
-
-# Recursive "all" directory target.
-Project/Source/all: Project/Source/CMakeFiles/lab5_nosys.dir/all
-Project/Source/all: Project/Source/CMakeFiles/ELF2UF2Build.dir/all
-Project/Source/all: Project/Source/CMakeFiles/lab5_sys.dir/all
-.PHONY : Project/Source/all
-
-# Recursive "preinstall" directory target.
-Project/Source/preinstall:
-.PHONY : Project/Source/preinstall
-
-# Recursive "clean" directory target.
-Project/Source/clean: Project/Source/CMakeFiles/lab5_nosys.dir/clean
-Project/Source/clean: Project/Source/CMakeFiles/ELF2UF2Build.dir/clean
-Project/Source/clean: Project/Source/CMakeFiles/lab5_sys.dir/clean
-.PHONY : Project/Source/clean
-
-#=============================================================================
-# Directory level rules for directory Project/tls_client
-
-# Recursive "all" directory target.
-Project/tls_client/all: Project/tls_client/CMakeFiles/picow_tls_client_background.dir/all
-Project/tls_client/all: Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/all
-Project/tls_client/all: Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/all
-.PHONY : Project/tls_client/all
-
-# Recursive "preinstall" directory target.
-Project/tls_client/preinstall:
-.PHONY : Project/tls_client/preinstall
-
-# Recursive "clean" directory target.
-Project/tls_client/clean: Project/tls_client/CMakeFiles/picow_tls_client_background.dir/clean
-Project/tls_client/clean: Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/clean
-Project/tls_client/clean: Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/clean
-.PHONY : Project/tls_client/clean
 
 #=============================================================================
 # Directory level rules for directory pico-sdk
@@ -1573,6 +1499,125 @@ pico-sdk/tools/clean:
 .PHONY : pico-sdk/tools/clean
 
 #=============================================================================
+# Directory level rules for directory src
+
+# Recursive "all" directory target.
+src/all: src/lab5/all
+.PHONY : src/all
+
+# Recursive "preinstall" directory target.
+src/preinstall: src/lab5/preinstall
+.PHONY : src/preinstall
+
+# Recursive "clean" directory target.
+src/clean: src/lab5/clean
+.PHONY : src/clean
+
+#=============================================================================
+# Directory level rules for directory src/lab5
+
+# Recursive "all" directory target.
+src/lab5/all: src/lab5/rtos/all
+.PHONY : src/lab5/all
+
+# Recursive "preinstall" directory target.
+src/lab5/preinstall: src/lab5/rtos/preinstall
+.PHONY : src/lab5/preinstall
+
+# Recursive "clean" directory target.
+src/lab5/clean: src/lab5/rtos/clean
+.PHONY : src/lab5/clean
+
+#=============================================================================
+# Directory level rules for directory src/lab5/rtos
+
+# Recursive "all" directory target.
+src/lab5/rtos/all: src/lab5/rtos/freertos/all
+src/lab5/rtos/all: src/lab5/rtos/tls_client/all
+.PHONY : src/lab5/rtos/all
+
+# Recursive "preinstall" directory target.
+src/lab5/rtos/preinstall: src/lab5/rtos/freertos/preinstall
+src/lab5/rtos/preinstall: src/lab5/rtos/tls_client/preinstall
+.PHONY : src/lab5/rtos/preinstall
+
+# Recursive "clean" directory target.
+src/lab5/rtos/clean: src/lab5/rtos/freertos/clean
+src/lab5/rtos/clean: src/lab5/rtos/tls_client/clean
+.PHONY : src/lab5/rtos/clean
+
+#=============================================================================
+# Directory level rules for directory src/lab5/rtos/freertos
+
+# Recursive "all" directory target.
+src/lab5/rtos/freertos/all: src/lab5/rtos/freertos/FREERTOS_KERNEL/all
+src/lab5/rtos/freertos/all: src/lab5/rtos/freertos/lab5/all
+.PHONY : src/lab5/rtos/freertos/all
+
+# Recursive "preinstall" directory target.
+src/lab5/rtos/freertos/preinstall: src/lab5/rtos/freertos/FREERTOS_KERNEL/preinstall
+src/lab5/rtos/freertos/preinstall: src/lab5/rtos/freertos/lab5/preinstall
+.PHONY : src/lab5/rtos/freertos/preinstall
+
+# Recursive "clean" directory target.
+src/lab5/rtos/freertos/clean: src/lab5/rtos/freertos/FREERTOS_KERNEL/clean
+src/lab5/rtos/freertos/clean: src/lab5/rtos/freertos/lab5/clean
+.PHONY : src/lab5/rtos/freertos/clean
+
+#=============================================================================
+# Directory level rules for directory src/lab5/rtos/freertos/FREERTOS_KERNEL
+
+# Recursive "all" directory target.
+src/lab5/rtos/freertos/FREERTOS_KERNEL/all:
+.PHONY : src/lab5/rtos/freertos/FREERTOS_KERNEL/all
+
+# Recursive "preinstall" directory target.
+src/lab5/rtos/freertos/FREERTOS_KERNEL/preinstall:
+.PHONY : src/lab5/rtos/freertos/FREERTOS_KERNEL/preinstall
+
+# Recursive "clean" directory target.
+src/lab5/rtos/freertos/FREERTOS_KERNEL/clean:
+.PHONY : src/lab5/rtos/freertos/FREERTOS_KERNEL/clean
+
+#=============================================================================
+# Directory level rules for directory src/lab5/rtos/freertos/lab5
+
+# Recursive "all" directory target.
+src/lab5/rtos/freertos/lab5/all: src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/all
+src/lab5/rtos/freertos/lab5/all: src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/all
+src/lab5/rtos/freertos/lab5/all: src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/all
+.PHONY : src/lab5/rtos/freertos/lab5/all
+
+# Recursive "preinstall" directory target.
+src/lab5/rtos/freertos/lab5/preinstall:
+.PHONY : src/lab5/rtos/freertos/lab5/preinstall
+
+# Recursive "clean" directory target.
+src/lab5/rtos/freertos/lab5/clean: src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/clean
+src/lab5/rtos/freertos/lab5/clean: src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/clean
+src/lab5/rtos/freertos/lab5/clean: src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/clean
+.PHONY : src/lab5/rtos/freertos/lab5/clean
+
+#=============================================================================
+# Directory level rules for directory src/lab5/rtos/tls_client
+
+# Recursive "all" directory target.
+src/lab5/rtos/tls_client/all: src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/all
+src/lab5/rtos/tls_client/all: src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/all
+src/lab5/rtos/tls_client/all: src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/all
+.PHONY : src/lab5/rtos/tls_client/all
+
+# Recursive "preinstall" directory target.
+src/lab5/rtos/tls_client/preinstall:
+.PHONY : src/lab5/rtos/tls_client/preinstall
+
+# Recursive "clean" directory target.
+src/lab5/rtos/tls_client/clean: src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/clean
+src/lab5/rtos/tls_client/clean: src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/clean
+src/lab5/rtos/tls_client/clean: src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/clean
+.PHONY : src/lab5/rtos/tls_client/clean
+
+#=============================================================================
 # Target rules for target pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default.dir
 
 # All Build rule for target.
@@ -1703,170 +1748,170 @@ pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bu
 .PHONY : pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/clean
 
 #=============================================================================
-# Target rules for target Project/Source/CMakeFiles/lab5_nosys.dir
+# Target rules for target src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir
 
 # All Build rule for target.
-Project/Source/CMakeFiles/lab5_nosys.dir/all: pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default_padded_checksummed_asm.dir/all
-Project/Source/CMakeFiles/lab5_nosys.dir/all: pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/all
-Project/Source/CMakeFiles/lab5_nosys.dir/all: Project/Source/CMakeFiles/ELF2UF2Build.dir/all
-	$(MAKE) $(MAKESILENT) -f Project/Source/CMakeFiles/lab5_nosys.dir/build.make Project/Source/CMakeFiles/lab5_nosys.dir/depend
-	$(MAKE) $(MAKESILENT) -f Project/Source/CMakeFiles/lab5_nosys.dir/build.make Project/Source/CMakeFiles/lab5_nosys.dir/build
+src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/all: pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default_padded_checksummed_asm.dir/all
+src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/all: pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/all
+src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/all: src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/all
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/build.make src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/depend
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/build.make src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles --progress-num=2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 "Built target lab5_nosys"
-.PHONY : Project/Source/CMakeFiles/lab5_nosys.dir/all
+.PHONY : src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/all
 
 # Build rule for subdir invocation for target.
-Project/Source/CMakeFiles/lab5_nosys.dir/rule: cmake_check_build_system
+src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles 16
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Project/Source/CMakeFiles/lab5_nosys.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles 0
-.PHONY : Project/Source/CMakeFiles/lab5_nosys.dir/rule
+.PHONY : src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/rule
 
 # Convenience name for target.
-lab5_nosys: Project/Source/CMakeFiles/lab5_nosys.dir/rule
+lab5_nosys: src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/rule
 .PHONY : lab5_nosys
 
 # clean rule for target.
-Project/Source/CMakeFiles/lab5_nosys.dir/clean:
-	$(MAKE) $(MAKESILENT) -f Project/Source/CMakeFiles/lab5_nosys.dir/build.make Project/Source/CMakeFiles/lab5_nosys.dir/clean
-.PHONY : Project/Source/CMakeFiles/lab5_nosys.dir/clean
+src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/clean:
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/build.make src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/clean
+.PHONY : src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_nosys.dir/clean
 
 #=============================================================================
-# Target rules for target Project/Source/CMakeFiles/ELF2UF2Build.dir
+# Target rules for target src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir
 
 # All Build rule for target.
-Project/Source/CMakeFiles/ELF2UF2Build.dir/all:
-	$(MAKE) $(MAKESILENT) -f Project/Source/CMakeFiles/ELF2UF2Build.dir/build.make Project/Source/CMakeFiles/ELF2UF2Build.dir/depend
-	$(MAKE) $(MAKESILENT) -f Project/Source/CMakeFiles/ELF2UF2Build.dir/build.make Project/Source/CMakeFiles/ELF2UF2Build.dir/build
+src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/all:
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/build.make src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/depend
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/build.make src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles --progress-num= "Built target ELF2UF2Build"
-.PHONY : Project/Source/CMakeFiles/ELF2UF2Build.dir/all
+.PHONY : src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/all
 
 # Build rule for subdir invocation for target.
-Project/Source/CMakeFiles/ELF2UF2Build.dir/rule: cmake_check_build_system
+src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles 0
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Project/Source/CMakeFiles/ELF2UF2Build.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles 0
-.PHONY : Project/Source/CMakeFiles/ELF2UF2Build.dir/rule
+.PHONY : src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/rule
 
 # Convenience name for target.
-ELF2UF2Build: Project/Source/CMakeFiles/ELF2UF2Build.dir/rule
+ELF2UF2Build: src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/rule
 .PHONY : ELF2UF2Build
 
 # clean rule for target.
-Project/Source/CMakeFiles/ELF2UF2Build.dir/clean:
-	$(MAKE) $(MAKESILENT) -f Project/Source/CMakeFiles/ELF2UF2Build.dir/build.make Project/Source/CMakeFiles/ELF2UF2Build.dir/clean
-.PHONY : Project/Source/CMakeFiles/ELF2UF2Build.dir/clean
+src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/clean:
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/build.make src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/clean
+.PHONY : src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/clean
 
 #=============================================================================
-# Target rules for target Project/Source/CMakeFiles/lab5_sys.dir
+# Target rules for target src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir
 
 # All Build rule for target.
-Project/Source/CMakeFiles/lab5_sys.dir/all: pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default_padded_checksummed_asm.dir/all
-Project/Source/CMakeFiles/lab5_sys.dir/all: pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/all
-Project/Source/CMakeFiles/lab5_sys.dir/all: Project/Source/CMakeFiles/ELF2UF2Build.dir/all
-	$(MAKE) $(MAKESILENT) -f Project/Source/CMakeFiles/lab5_sys.dir/build.make Project/Source/CMakeFiles/lab5_sys.dir/depend
-	$(MAKE) $(MAKESILENT) -f Project/Source/CMakeFiles/lab5_sys.dir/build.make Project/Source/CMakeFiles/lab5_sys.dir/build
+src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/all: pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default_padded_checksummed_asm.dir/all
+src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/all: pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/all
+src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/all: src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/all
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/build.make src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/depend
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/build.make src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles --progress-num=17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33 "Built target lab5_sys"
-.PHONY : Project/Source/CMakeFiles/lab5_sys.dir/all
+.PHONY : src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/all
 
 # Build rule for subdir invocation for target.
-Project/Source/CMakeFiles/lab5_sys.dir/rule: cmake_check_build_system
+src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles 18
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Project/Source/CMakeFiles/lab5_sys.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles 0
-.PHONY : Project/Source/CMakeFiles/lab5_sys.dir/rule
+.PHONY : src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/rule
 
 # Convenience name for target.
-lab5_sys: Project/Source/CMakeFiles/lab5_sys.dir/rule
+lab5_sys: src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/rule
 .PHONY : lab5_sys
 
 # clean rule for target.
-Project/Source/CMakeFiles/lab5_sys.dir/clean:
-	$(MAKE) $(MAKESILENT) -f Project/Source/CMakeFiles/lab5_sys.dir/build.make Project/Source/CMakeFiles/lab5_sys.dir/clean
-.PHONY : Project/Source/CMakeFiles/lab5_sys.dir/clean
+src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/clean:
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/build.make src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/clean
+.PHONY : src/lab5/rtos/freertos/lab5/CMakeFiles/lab5_sys.dir/clean
 
 #=============================================================================
-# Target rules for target Project/tls_client/CMakeFiles/picow_tls_client_background.dir
+# Target rules for target src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir
 
 # All Build rule for target.
-Project/tls_client/CMakeFiles/picow_tls_client_background.dir/all: pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default_padded_checksummed_asm.dir/all
-Project/tls_client/CMakeFiles/picow_tls_client_background.dir/all: pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/all
-Project/tls_client/CMakeFiles/picow_tls_client_background.dir/all: Project/Source/CMakeFiles/ELF2UF2Build.dir/all
-	$(MAKE) $(MAKESILENT) -f Project/tls_client/CMakeFiles/picow_tls_client_background.dir/build.make Project/tls_client/CMakeFiles/picow_tls_client_background.dir/depend
-	$(MAKE) $(MAKESILENT) -f Project/tls_client/CMakeFiles/picow_tls_client_background.dir/build.make Project/tls_client/CMakeFiles/picow_tls_client_background.dir/build
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/all: pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default_padded_checksummed_asm.dir/all
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/all: pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/all
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/all: src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/all
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/build.make src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/depend
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/build.make src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles --progress-num=34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55 "Built target picow_tls_client_background"
-.PHONY : Project/tls_client/CMakeFiles/picow_tls_client_background.dir/all
+.PHONY : src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/all
 
 # Build rule for subdir invocation for target.
-Project/tls_client/CMakeFiles/picow_tls_client_background.dir/rule: cmake_check_build_system
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles 23
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Project/tls_client/CMakeFiles/picow_tls_client_background.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles 0
-.PHONY : Project/tls_client/CMakeFiles/picow_tls_client_background.dir/rule
+.PHONY : src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/rule
 
 # Convenience name for target.
-picow_tls_client_background: Project/tls_client/CMakeFiles/picow_tls_client_background.dir/rule
+picow_tls_client_background: src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/rule
 .PHONY : picow_tls_client_background
 
 # clean rule for target.
-Project/tls_client/CMakeFiles/picow_tls_client_background.dir/clean:
-	$(MAKE) $(MAKESILENT) -f Project/tls_client/CMakeFiles/picow_tls_client_background.dir/build.make Project/tls_client/CMakeFiles/picow_tls_client_background.dir/clean
-.PHONY : Project/tls_client/CMakeFiles/picow_tls_client_background.dir/clean
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/clean:
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/build.make src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/clean
+.PHONY : src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_background.dir/clean
 
 #=============================================================================
-# Target rules for target Project/tls_client/CMakeFiles/picow_tls_client_poll.dir
+# Target rules for target src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir
 
 # All Build rule for target.
-Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/all: pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default_padded_checksummed_asm.dir/all
-Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/all: pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/all
-Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/all: Project/Source/CMakeFiles/ELF2UF2Build.dir/all
-	$(MAKE) $(MAKESILENT) -f Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/build.make Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/depend
-	$(MAKE) $(MAKESILENT) -f Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/build.make Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/build
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/all: pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default_padded_checksummed_asm.dir/all
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/all: pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/all
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/all: src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/all
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/build.make src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/depend
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/build.make src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles --progress-num=56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77 "Built target picow_tls_client_poll"
-.PHONY : Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/all
+.PHONY : src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/all
 
 # Build rule for subdir invocation for target.
-Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/rule: cmake_check_build_system
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles 23
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles 0
-.PHONY : Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/rule
+.PHONY : src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/rule
 
 # Convenience name for target.
-picow_tls_client_poll: Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/rule
+picow_tls_client_poll: src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/rule
 .PHONY : picow_tls_client_poll
 
 # clean rule for target.
-Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/clean:
-	$(MAKE) $(MAKESILENT) -f Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/build.make Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/clean
-.PHONY : Project/tls_client/CMakeFiles/picow_tls_client_poll.dir/clean
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/clean:
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/build.make src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/clean
+.PHONY : src/lab5/rtos/tls_client/CMakeFiles/picow_tls_client_poll.dir/clean
 
 #=============================================================================
-# Target rules for target Project/tls_client/CMakeFiles/picow_tls_verify_background.dir
+# Target rules for target src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir
 
 # All Build rule for target.
-Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/all: pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default_padded_checksummed_asm.dir/all
-Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/all: pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/all
-Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/all: Project/Source/CMakeFiles/ELF2UF2Build.dir/all
-	$(MAKE) $(MAKESILENT) -f Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/build.make Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/depend
-	$(MAKE) $(MAKESILENT) -f Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/build.make Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/build
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/all: pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default_padded_checksummed_asm.dir/all
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/all: pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h.dir/all
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/all: src/lab5/rtos/freertos/lab5/CMakeFiles/ELF2UF2Build.dir/all
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/build.make src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/depend
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/build.make src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles --progress-num=78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100 "Built target picow_tls_verify_background"
-.PHONY : Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/all
+.PHONY : src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/all
 
 # Build rule for subdir invocation for target.
-Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/rule: cmake_check_build_system
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles 24
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/CMakeFiles 0
-.PHONY : Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/rule
+.PHONY : src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/rule
 
 # Convenience name for target.
-picow_tls_verify_background: Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/rule
+picow_tls_verify_background: src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/rule
 .PHONY : picow_tls_verify_background
 
 # clean rule for target.
-Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/clean:
-	$(MAKE) $(MAKESILENT) -f Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/build.make Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/clean
-.PHONY : Project/tls_client/CMakeFiles/picow_tls_verify_background.dir/clean
+src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/clean:
+	$(MAKE) $(MAKESILENT) -f src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/build.make src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/clean
+.PHONY : src/lab5/rtos/tls_client/CMakeFiles/picow_tls_verify_background.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.
