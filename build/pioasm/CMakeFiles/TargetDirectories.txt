@@ -1,0 +1,3 @@
+/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/pioasm/CMakeFiles/pioasm.dir
+/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/pioasm/CMakeFiles/edit_cache.dir
+/Users/KuangYi/Desktop/EmbeddedSystems/INF2004_Embedded_Systems/build/pioasm/CMakeFiles/rebuild_cache.dir
