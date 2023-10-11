@@ -1,6 +1,3 @@
-// C / C++ program for Dijkstra's shortest path algorithm for adjacency
-// list representation of graph
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
