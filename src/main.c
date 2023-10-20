@@ -10,6 +10,8 @@
 #include "lwip/ip4_addr.h"
 #include "ping.h"
 
+#include "pathfinder/algorithms.h"
+
 #define mbaTASK_MESSAGE_BUFFER_SIZE       ( 60 )
 #ifndef RUN_FREERTOS_ON_CORE
 #define RUN_FREERTOS_ON_CORE 0
@@ -175,7 +177,8 @@ void printerTask(__unused void *params)
             printf("The current temperature is %0.2f C\n", currentTemperature);
             printf("The moving Average Temperature is %0.2f C\n", movingAverageTemperature);
             printf("The simple Average Temperature is %0.2f C\n", simpleAverageTemperature);
-            printf("");
+            printFromAlgo();
+            
     }
 }
 
