@@ -69,7 +69,9 @@ void main_task(__unused void *params) {
 
 void connectWifi(__unused void *params)
 {
-    while(!connected){
+    while(!connected)
+    {
+
         if (cyw43_arch_init()) {
             printf("failed to initialise\n");
             return;
@@ -83,11 +85,11 @@ void connectWifi(__unused void *params)
             connected = 1;
             printf("Connected.\n");
         }
-
-        while(true)
+        
+        while(connected)
         {
-            vTaskDelay(100);
-        }
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        };
         
         cyw43_arch_deinit();
     }
