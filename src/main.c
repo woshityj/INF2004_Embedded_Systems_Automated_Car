@@ -11,6 +11,9 @@
 #include "ping.h"
 
 #include "pathfinder/algorithms.h"
+#define CORE_ONE 0X2
+#define CORE_ZERO 0x1
+#define BOTH_CORES 0x3
 
 #define mbaTASK_MESSAGE_BUFFER_SIZE       ( 60 )
 #ifndef RUN_FREERTOS_ON_CORE
@@ -26,6 +29,7 @@ static MessageBufferHandle_t temperatureToMovingTask;
 static MessageBufferHandle_t temperatureToSimpleTask;
 static MessageBufferHandle_t movingAverageBufferPrint;
 static MessageBufferHandle_t simpleAverageBufferPrint;
+bool connected = 0;
 /* End of Global Variables initialization */
 
 float read_onboard_temperature() {
@@ -65,24 +69,28 @@ void main_task(__unused void *params) {
 
 void connectWifi(__unused void *params)
 {
-    if (cyw43_arch_init()) {
-        printf("failed to initialise\n");
-        return;
-    }
-    cyw43_arch_enable_sta_mode();
-    printf("Connecting to Wi-Fi...\n");
-    if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000)) {
-        printf("failed to connect.\n");
-    } else {
-        printf("Connected.\n");
-    }
+    while(!connected){
+        if (cyw43_arch_init()) {
+            printf("failed to initialise\n");
+            return;
+        }
+        cyw43_arch_enable_sta_mode();
+        printf("Connecting to Wi-Fi...\n");
+        if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000)) {
+            connected = 0;
+            printf("failed to connect.\n");
+        } else {
+            connected = 1;
+            printf("Connected.\n");
+        }
 
-    while(true)
-    {
-        vTaskDelay(100);
+        while(true)
+        {
+            vTaskDelay(100);
+        }
+        
+        cyw43_arch_deinit();
     }
-    
-    cyw43_arch_deinit();
 }
 /* A Task that indefinitely waits for data from main_task via message buffer. 
 Once received, it will calculate the moving average and prints out the result. */
@@ -188,28 +196,47 @@ void vLaunch( void)
 
     TaskHandle_t taskToMeasureTemperature;
     xTaskCreate(main_task, "temperatureReaderThread", configMINIMAL_STACK_SIZE, NULL, TEST_TASK_PRIORITY, &taskToMeasureTemperature);
+    vTaskCoreAffinitySet(taskToMeasureTemperature, BOTH_CORES);
 
     TaskHandle_t taskToGetMovingAverage;
-    xTaskCreate(movingAverageTask, "movingAvgThread", configMINIMAL_STACK_SIZE, NULL, 7, &taskToGetMovingAverage);
+    xTaskCreate(movingAverageTask, "movingAvgThread", configMINIMAL_STACK_SIZE, NULL, 7, & taskToGetMovingAverage);
+    vTaskCoreAffinitySet(taskToGetMovingAverage, CORE_ZERO);
 
     TaskHandle_t taskToGetSimpleAverage;
     xTaskCreate(simpleAverageTask, "simpleAverageThread", configMINIMAL_STACK_SIZE, NULL, 7, &taskToGetSimpleAverage);
+    vTaskCoreAffinitySet(taskToGetSimpleAverage, CORE_ZERO);
 
     TaskHandle_t taskToPrintOutTemperatures;
     xTaskCreate(printerTask, "printerThread", configMINIMAL_STACK_SIZE, NULL, 5, &taskToPrintOutTemperatures);
+    vTaskCoreAffinitySet(taskToPrintOutTemperatures, CORE_ONE);
 
     TaskHandle_t wifiTask;
     xTaskCreate(connectWifi, "wifi Connection", configMINIMAL_STACK_SIZE, NULL, 1, &wifiTask);
+    vTaskCoreAffinitySet(wifiTask, CORE_ONE);
 
     temperatureToMovingTask = xMessageBufferCreate(mbaTASK_MESSAGE_BUFFER_SIZE);
     temperatureToSimpleTask = xMessageBufferCreate(mbaTASK_MESSAGE_BUFFER_SIZE);
     movingAverageBufferPrint = xMessageBufferCreate(mbaTASK_MESSAGE_BUFFER_SIZE);
     simpleAverageBufferPrint = xMessageBufferCreate(mbaTASK_MESSAGE_BUFFER_SIZE);
 
+    UBaseType_t taskOne = vTaskCoreAffinityGet(taskToMeasureTemperature);
+    printf("Task One is on Core(s): %d\n", taskOne-1);
 
-#if NO_SYS && configUSE_CORE_AFFINITY && configNUM_CORES > 1
-    vTaskCoreAffinitySet(task, 1);
-#endif
+    UBaseType_t taskTwo = vTaskCoreAffinityGet(taskToGetMovingAverage);
+    printf("Task Two is on Core: %d\n", taskTwo-1);
+    
+    UBaseType_t taskThree = vTaskCoreAffinityGet(taskToGetSimpleAverage);
+    printf("Task Three is on Core: %d\n", taskThree-1);
+
+    UBaseType_t taskFour = vTaskCoreAffinityGet(taskToPrintOutTemperatures);
+    printf("Task Four is on Core: %d\n", taskFour-1);
+
+    UBaseType_t taskFive = vTaskCoreAffinityGet(wifiTask);
+    printf("Task Five is on Core: %d\n", taskFive-1);
+
+//#if NO_SYS && configUSE_CORE_AFFINITY && configNUM_CORES > 1
+//    vTaskCoreAffinitySet(main_task, 1);
+//#endif
 
     /* Start the tasks and timer running. */
     vTaskStartScheduler();
@@ -228,6 +255,7 @@ int main( void )
 #endif
 
 #if ( portSUPPORT_SMP == 1 ) && ( configNUM_CORES == 2 )
+    sleep_ms(5000);
     printf("Starting %s on both cores:\n", rtos_name);
     vLaunch();
 #elif ( RUN_FREERTOS_ON_CORE == 1 )
