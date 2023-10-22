@@ -15,8 +15,8 @@ set(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_LIST_DIR}/lib/FreeRTOS-Kernel)
 include(cmakeDependancies/FREERTOS_Kernel_import.cmake)
 
 set(PICO_BOARD pico_w)
-set(WIFI_SSID Poh)
-set(WIFI_PASSWORD lsps353ycss)
+set(WIFI_SSID ShoutPenisForPassword_1_5GHz)
+set(WIFI_PASSWORD Tyjtyc3009)
 
 if (PICO_SDK_VERSION_STRING VERSION_LESS "1.3.0")
     message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.3.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")

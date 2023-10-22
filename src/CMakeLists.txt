@@ -53,3 +53,5 @@ if (EXISTS ${PICO_LWIP_CONTRIB_PATH}/apps/ping/ping.c)
 endif()
 
 add_subdirectory(infrared)
+add_subdirectory(encoder)
+add_subdirectory(motor)
