@@ -25,41 +25,21 @@ volatile int encIndex = 0;
 volatile int leftInterruptBuffer[INTERRUPT_BUF_SIZE];
 volatile int rightInterruptBuffer[INTERRUPT_BUF_SIZE];
 
-volatile int encoderISRLeftCounter = 0;
-
-// int get_rpm()
-// {
-//     if (newTime != 0)
-//     {
-//         pulseTime = newTime - oldTime;
-
-//         if (pulseTime < ((time_us_32() / 1000) - newTime)) 
-//         {
-//             pulseTime = (time_us_32() / 1000) - newTime;
-//         }
-
-//         return 60000000 / pulseTime;
-//     }
-//     return 0;
-// }
-
 void gpio_callback_isr(uint gpio, uint32_t events)
 {
     if (gpio == GPIO_PIN_ENC_LEFT)
     {
-        // oldTime = newTime;
-        // newTime = (time_us_32() / 1000);
-
         leftInterruptBuffer[encIndex]++;
+    }
+
+    if (gpio == GPIO_PIN_ENC_RIGHT)
+    {
+        rightInterruptBuffer[encIndex]++;
     }
 }
 
 bool repeating_timer_callback_isr(struct repeating_timer *t)
 {
-    // int rpm = get_rpm();
-    // printf("RPM is %d\n", rpm);
-    // return true;
-
     encIndex++;
     if (encIndex == INTERRUPT_BUF_SIZE)
         encIndex = 0;
@@ -80,6 +60,15 @@ int get_wheel_interrupt_speed(uint gpio)
             total += leftInterruptBuffer[i];
         }
     }
+    else if (gpio == GPIO_PIN_ENC_RIGHT)
+    {
+        for (int i = 0; i < INTERRUPT_BUF_SIZE; i++)
+        {
+            if (i == encIndex)
+                continue;
+            total += rightInterruptBuffer[i];
+        }
+    }
     return total;
 }
 
@@ -89,20 +78,28 @@ float get_wheel_speed(uint gpio)
     return interrupts_per_sec * CM_PER_SLOT;
 }
 
-
-int main()
-{
-    stdio_usb_init();
-    printf("[Encoder] Init start \n");
+void encoder_driver_init()
+{   
+    printf("[Encoder] Init start\n");
 
     struct repeating_timer timer;
 
     add_repeating_timer_ms(-250, repeating_timer_callback_isr, NULL, &timer);
 
     gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_LEFT, GPIO_IRQ_EDGE_FALL, true, &gpio_callback_isr);
+    gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_RIGHT, GPIO_IRQ_EDGE_FALL, true, &gpio_callback_isr);
+}
+
+
+int main()
+{
+    encoder_driver_init();
+    
+    stdio_usb_init();
+
     while(true)
     {
-        float speed = get_wheel_speed(GPIO_PIN_ENC_LEFT);
+        float speed = get_wheel_speed(GPIO_PIN_ENC_RIGHT);
         printf("Speed is %0.2f cm/s\n", speed);
 
         sleep_ms(1000);
