@@ -51,3 +51,5 @@ if (EXISTS ${PICO_LWIP_CONTRIB_PATH}/apps/ping/ping.c)
     pico_enable_stdio_usb(autonomousCar_sys 1)
     pico_add_extra_outputs(autonomousCar_sys)
 endif()
+
+add_subdirectory(infrared)

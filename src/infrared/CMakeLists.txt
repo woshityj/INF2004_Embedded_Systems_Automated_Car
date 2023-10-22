@@ -1,0 +1,10 @@
+add_executable(infrared infrared.c)
+
+# pull in common dependencies
+target_link_libraries(infrared pico_stdlib)
+
+# enable usb output, enable uart output
+pico_enable_stdio_usb(infrared 1)
+
+# create map/bin/hex file etc.
+pico_add_extra_outputs(infrared)
