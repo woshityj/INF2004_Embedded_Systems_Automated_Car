@@ -25,16 +25,20 @@ volatile int encIndex = 0;
 volatile int leftInterruptBuffer[INTERRUPT_BUF_SIZE];
 volatile int rightInterruptBuffer[INTERRUPT_BUF_SIZE];
 
+volatile int total_interrupts = 0;
+
 void gpio_callback_isr(uint gpio, uint32_t events)
 {
     if (gpio == GPIO_PIN_ENC_LEFT)
     {
         leftInterruptBuffer[encIndex]++;
+        total_interrupts += 1;
     }
 
     if (gpio == GPIO_PIN_ENC_RIGHT)
     {
         rightInterruptBuffer[encIndex]++;
+        total_interrupts += 1;
     }
 }
 
@@ -88,6 +92,11 @@ void encoder_driver_init()
 
     gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_LEFT, GPIO_IRQ_EDGE_FALL, true, &gpio_callback_isr);
     gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_RIGHT, GPIO_IRQ_EDGE_FALL, true, &gpio_callback_isr);
+}
+
+float get_distance_travelled()
+{
+    return (total_interrupts / 2) * CM_PER_SLOT;
 }
 
 
