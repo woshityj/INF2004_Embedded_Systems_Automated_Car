@@ -1,10 +1,15 @@
 #ifndef mapper
 #define mapper
 
-#define NORTH 1
-#define SOUTH 2
-#define EAST 3
-#define WEST 4
+#define NORTH 0x1
+#define SOUTH 0x2
+#define EAST 0x3
+#define WEST 0x4
+
+#define EVENT_NORTH 0x1
+#define EVENT_SOUTH 0x2
+#define EVENT_EAST 0x3
+#define EVENT_WEST 0x4
 
 #include "set.h"
 
