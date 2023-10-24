@@ -1,7 +1,3 @@
-// Logic Error -- Adjusted PID Controller parameters to suit the
-// ones shown in the pseudocode
-//
-
 typedef struct {
     float kp;
     float ki;
@@ -10,5 +6,5 @@ typedef struct {
     float setpoint;
 } pid_t;
 
-float create_pid(float kp, float ki, float kd, float setpoint);
-float compute_pid(float setpoint, float current_value, float *p_integral, float *p_prev_error);
+float compute_pid(pid_t *pid, float current_value, float *p_integral, float *p_prev_error);
+pid_t create_pid(float kp, float ki, float kd, float setpoint);
