@@ -2,6 +2,8 @@
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
 
+#include "motor_driver.h"
+
 #define GPIO_PIN_PWM_EN1 0
 #define GPIO_PIN_PWM_EN2 1
 
@@ -99,6 +101,12 @@ void set_speed(uint duty_cycle, int motor)
     }
 
     printf("[Motor] Set speed to %u \n", duty_cycle);
+}
+
+void stop()
+{
+    set_speed(0, MOTOR_LEFT);
+    set_speed(0, MOTOR_RIGHT);
 }
 
 void motor_driver_init()
