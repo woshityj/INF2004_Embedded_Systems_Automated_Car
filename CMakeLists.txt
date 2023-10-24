@@ -15,7 +15,7 @@ set(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_LIST_DIR}/lib/FreeRTOS-Kernel)
 include(cmakeDependancies/FREERTOS_Kernel_import.cmake)
 
 set(PICO_BOARD pico_w)
-set(WIFI_SSID ShoutPenisForPassword_1_5GHz)
+set(WIFI_SSID ShoutPenisForPassword_1_2.4GHz)
 set(WIFI_PASSWORD Tyjtyc3009)
 
 if (PICO_SDK_VERSION_STRING VERSION_LESS "1.3.0")
