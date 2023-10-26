@@ -35,3 +35,4 @@ void calculate_timing_difference(float timings[], float timing_differences[]);
 void find_top_three_timings(float arr[], float *first, float *second, float *third);
 void form_binary_array(float timing_differences[], int char_binary_array[], float first, float second, float third);
 char decode_array(int char_binary_array[]);
+void reverse_array(int arr[]);

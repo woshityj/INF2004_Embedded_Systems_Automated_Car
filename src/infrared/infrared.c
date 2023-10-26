@@ -14,7 +14,7 @@ bool detect_wall()
 {
     // Line detected
     //
-    if (adc_read > 1500)
+    if (adc_read() > 1500)
     {
         return true;
     }
@@ -45,7 +45,7 @@ Directions* get_directions(int currentlyFacing)
             dir->north = detect_wall();
             dir->south = NULL;
             adc_select_input(ADC_RIGHT);
-            dir->east = detect_wall;
+            dir->east = detect_wall();
             adc_select_input(ADC_LEFT);
             dir->west = adc_read();
             break;
@@ -57,7 +57,7 @@ Directions* get_directions(int currentlyFacing)
             adc_select_input(ADC_FRONT);
             dir->south = detect_wall();
             adc_select_input(ADC_RIGHT);
-            dir->east = detect_wall;
+            dir->east = detect_wall();
             adc_select_input(ADC_LEFT);
             dir->west = adc_read();
             break;
@@ -68,7 +68,7 @@ Directions* get_directions(int currentlyFacing)
             adc_select_input(ADC_LEFT);
             dir->north = detect_wall();
             adc_select_input(ADC_RIGHT);
-            dir->south = detect_wall;
+            dir->south = detect_wall();
             adc_select_input(ADC_FRONT);
             dir->east = adc_read();
             dir->west = NULL;
@@ -79,7 +79,7 @@ Directions* get_directions(int currentlyFacing)
             adc_select_input(ADC_RIGHT);
             dir->north = detect_wall();
             adc_select_input(ADC_LEFT);
-            dir->south = detect_wall;
+            dir->south = detect_wall();
             dir->east = NULL;
             adc_select_input(ADC_FRONT);
             dir->west = adc_read();
@@ -159,7 +159,7 @@ bool IR_barcode_scan(struct repeating_timer *t)
 
         // Decode the reverse binary array
         //
-        reverseArray(char_binary_array);
+        reverse_array(char_binary_array);
         char decoded_character_reverse = decode_array(char_binary_array);
         printf("%c\n",decoded_character_reverse);
 
@@ -298,7 +298,7 @@ char decode_array(int char_binary_array[])
 
 // Function to reverse the contents of an array
 //
-void reverseArray(int arr[])
+void reverse_array(int arr[])
 {
     int start = 0;
     int end = BINARYARRAY_BUFFERSIZE - 1;
