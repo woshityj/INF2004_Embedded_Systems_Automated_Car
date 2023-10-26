@@ -1,9 +1,3 @@
-/**
- * Copyright (c) 2022 Raspberry Pi (Trading) Ltd.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 #include <string.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +11,6 @@
 #define TCP_PORT 4242
 #define DEBUG_printf printf
 #define BUF_SIZE 2048
-#define TEST_ITERATIONS 10
 #define POLL_TIME_S 20
 
 // WIFI Credentials - take care if pushing to github!
@@ -32,7 +25,6 @@ typedef struct TCP_SERVER_T_ {
     char buffer_recv[BUF_SIZE];
     int sent_len;
     int recv_len;
-    int run_count;
 } TCP_SERVER_T;
 
 static TCP_SERVER_T* tcp_server_init(void) {
@@ -69,6 +61,30 @@ static err_t tcp_server_close(void *arg) {
     return err;
 }
 
+
+static err_t tcp_client_close(void *arg)
+{
+    TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
+    err_t err = ERR_OK;
+    if (state->client_pcb != NULL)
+    {
+        tcp_arg(state->client_pcb, NULL);
+        tcp_poll(state->client_pcb, NULL, 0);
+        tcp_sent(state->client_pcb, NULL);
+        tcp_recv(state->client_pcb, NULL);
+        tcp_err(state->client_pcb, NULL);
+        err = tcp_close(state->client_pcb);
+        if (err != ERR_OK) {
+            DEBUG_printf("close failed %d, calling abort\n", err);
+            tcp_abort(state->client_pcb);
+            err = ERR_ABRT;
+        }
+        state->client_pcb = NULL;
+    }
+
+    return err;
+}
+
 static err_t tcp_server_result(void *arg, int status) {
     TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
     if (status == 0) {
@@ -76,6 +92,8 @@ static err_t tcp_server_result(void *arg, int status) {
     } else {
         DEBUG_printf("test failed %d\n", status);
     }
+
+    printf("[WiFi] Closed TCP Connection");
     state->complete = true;
     return tcp_server_close(arg);
 }
@@ -85,12 +103,9 @@ static err_t tcp_server_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
     DEBUG_printf("tcp_server_sent %u\n", len);
     state->sent_len += len;
 
-    if (state->sent_len >= BUF_SIZE) {
+    state->recv_len = 0;
 
-        // We should get the data back from the client
-        state->recv_len = 0;
-        DEBUG_printf("Waiting for buffer from client\n");
-    }
+    printf("Waiting for buffer from client\n");
 
     return ERR_OK;
 }
@@ -98,12 +113,9 @@ static err_t tcp_server_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
 err_t tcp_server_send_data(void *arg, struct tcp_pcb *tpcb, char message[BUF_SIZE])
 {
     TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
-    // for(int i=0; i< BUF_SIZE; i++) {
-    //     state->buffer_sent[i] = rand();
-    // }
+
     strcpy(state->buffer_sent, message);
     
-
     state->sent_len = 0;
     DEBUG_printf("Writing %ld bytes to client\n", BUF_SIZE);
     // this method is callback from lwIP, so cyw43_arch_lwip_begin is not required, however you
@@ -120,7 +132,8 @@ err_t tcp_server_send_data(void *arg, struct tcp_pcb *tpcb, char message[BUF_SIZ
 
 err_t tcp_server_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err) {
     TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
-    if (!p) {
+    if (!p) 
+    {
         return tcp_server_result(arg, -1);
     }
     // this method is callback from lwIP, so cyw43_arch_lwip_begin is not required, however you
@@ -135,35 +148,28 @@ err_t tcp_server_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
         state->recv_len += pbuf_copy_partial(p, state->buffer_recv + state->recv_len,
                                              p->tot_len > buffer_left ? buffer_left : p->tot_len, 0);
         tcp_recved(tpcb, p->tot_len);
-        printf("Test buffer_recv 1: %s\n", state->buffer_recv);
-        printf("Test buffer_recv 1: %s\n", state->buffer_recv);
     }
     pbuf_free(p);
 
     // Have we have received the whole buffer
     if (state->recv_len == BUF_SIZE) {
 
-        char message[BUF_SIZE] = "Penis";
-
         // check it matches
         printf("Test buffer_sent: %s\n", state->buffer_sent);
         printf("Test buffer_recv: %s\n", state->buffer_recv);
-        // if (memcmp(state->buffer_sent, state->buffer_recv, BUF_SIZE) != 0) {
-        //     DEBUG_printf("buffer mismatch\n");
-        //     return tcp_server_result(arg, -1);
-        // }
+        
         DEBUG_printf("tcp_server_recv buffer ok\n");
 
-        // Test complete?
-        state->run_count++;
-        if (state->run_count >= TEST_ITERATIONS) {
-            tcp_server_result(arg, 0);
-            return ERR_OK;
+        if (strcmp(state->buffer_recv, "exit"))
+        {
+            if (state->client_pcb != NULL)
+            {
+                err = tcp_client_close(arg);
+                return err;
+            }
         }
-
-        // Send another buffer
-        return tcp_server_send_data(arg, state->client_pcb, message);
     }
+
     return ERR_OK;
 }
 
@@ -231,32 +237,22 @@ static bool tcp_server_open(void *arg) {
     return true;
 }
 
-void run_tcp_server_test(void) {
+void run_tcp_server(void)
+{
     TCP_SERVER_T *state = tcp_server_init();
-    if (!state) {
+    if (!state)
+    {
         return;
     }
-    if (!tcp_server_open(state)) {
+    
+    if (!tcp_server_open(state->client_pcb))
+    {
         tcp_server_result(state, -1);
         return;
     }
-    while(!state->complete) {
-        // the following #ifdef is only here so this same example can be used in multiple modes;
-        // you do not need it in your code
-#if PICO_CYW43_ARCH_POLL
-        // if you are using pico_cyw43_arch_poll, then you must poll periodically from your
-        // main loop (not from a timer) to check for Wi-Fi driver or lwIP work that needs to be done.
-        cyw43_arch_poll();
-        // you can poll as often as you like, however if you have nothing else to do you can
-        // choose to sleep until either a specified time, or cyw43_arch_poll() has work to do:
-        cyw43_arch_wait_for_work_until(make_timeout_time_ms(1000));
-#else
-        // if you are not using pico_cyw43_arch_poll, then WiFI driver and lwIP work
-        // is done via interrupt in the background. This sleep is just an example of some (blocking)
-        // work you might be doing.
-        sleep_ms(1000);
-#endif
-    }
+
+    while(1);
+
     free(state);
 }
 
@@ -279,7 +275,7 @@ void wifi_init()
 
     printf("[WiFi] Connected.\n");
 
-    run_tcp_server_test();
+    run_tcp_server();
     cyw43_arch_deinit();
 
     return;

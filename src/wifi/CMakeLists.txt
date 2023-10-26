@@ -1,5 +1,5 @@
 add_executable(wifi
-        wifi.c
+        wifi_new.c
         )
 
 target_include_directories(wifi PRIVATE

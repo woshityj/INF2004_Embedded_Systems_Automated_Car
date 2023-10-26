@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
-#include "hardware_adc/pwm.h"
+#include "hardware/pwm.h"
 
 #include "motor_driver.c"
 #include "pid.c"

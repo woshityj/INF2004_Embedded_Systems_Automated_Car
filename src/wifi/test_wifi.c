@@ -6,7 +6,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
@@ -18,9 +17,8 @@
 #define DEBUG_printf printf
 #define BUF_SIZE 2048
 #define TEST_ITERATIONS 10
-#define POLL_TIME_S 20
+#define POLL_TIME_S 5
 
-// WIFI Credentials - take care if pushing to github!
 const char WIFI_SSID[] = "ShoutPenisForPassword_1_2.4GHz";
 const char WIFI_PASSWORD[] = "Tyjtyc3009";
 
@@ -28,8 +26,8 @@ typedef struct TCP_SERVER_T_ {
     struct tcp_pcb *server_pcb;
     struct tcp_pcb *client_pcb;
     bool complete;
-    char buffer_sent[BUF_SIZE];
-    char buffer_recv[BUF_SIZE];
+    uint8_t buffer_sent[BUF_SIZE];
+    uint8_t buffer_recv[BUF_SIZE];
     int sent_len;
     int recv_len;
     int run_count;
@@ -95,14 +93,12 @@ static err_t tcp_server_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
     return ERR_OK;
 }
 
-err_t tcp_server_send_data(void *arg, struct tcp_pcb *tpcb, char message[BUF_SIZE])
+err_t tcp_server_send_data(void *arg, struct tcp_pcb *tpcb)
 {
     TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
-    // for(int i=0; i< BUF_SIZE; i++) {
-    //     state->buffer_sent[i] = rand();
-    // }
-    strcpy(state->buffer_sent, message);
-    
+    for(int i=0; i< BUF_SIZE; i++) {
+        state->buffer_sent[i] = rand();
+    }
 
     state->sent_len = 0;
     DEBUG_printf("Writing %ld bytes to client\n", BUF_SIZE);
@@ -135,23 +131,17 @@ err_t tcp_server_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
         state->recv_len += pbuf_copy_partial(p, state->buffer_recv + state->recv_len,
                                              p->tot_len > buffer_left ? buffer_left : p->tot_len, 0);
         tcp_recved(tpcb, p->tot_len);
-        printf("Test buffer_recv 1: %s\n", state->buffer_recv);
-        printf("Test buffer_recv 1: %s\n", state->buffer_recv);
     }
     pbuf_free(p);
 
     // Have we have received the whole buffer
     if (state->recv_len == BUF_SIZE) {
 
-        char message[BUF_SIZE] = "Penis";
-
         // check it matches
-        printf("Test buffer_sent: %s\n", state->buffer_sent);
-        printf("Test buffer_recv: %s\n", state->buffer_recv);
-        // if (memcmp(state->buffer_sent, state->buffer_recv, BUF_SIZE) != 0) {
-        //     DEBUG_printf("buffer mismatch\n");
-        //     return tcp_server_result(arg, -1);
-        // }
+        if (memcmp(state->buffer_sent, state->buffer_recv, BUF_SIZE) != 0) {
+            DEBUG_printf("buffer mismatch\n");
+            return tcp_server_result(arg, -1);
+        }
         DEBUG_printf("tcp_server_recv buffer ok\n");
 
         // Test complete?
@@ -162,7 +152,7 @@ err_t tcp_server_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
         }
 
         // Send another buffer
-        return tcp_server_send_data(arg, state->client_pcb, message);
+        return tcp_server_send_data(arg, state->client_pcb);
     }
     return ERR_OK;
 }
@@ -188,8 +178,6 @@ static err_t tcp_server_accept(void *arg, struct tcp_pcb *client_pcb, err_t err)
     }
     DEBUG_printf("Client connected\n");
 
-    char message[BUF_SIZE] = "Penis";
-
     state->client_pcb = client_pcb;
     tcp_arg(client_pcb, state);
     tcp_sent(client_pcb, tcp_server_sent);
@@ -197,7 +185,7 @@ static err_t tcp_server_accept(void *arg, struct tcp_pcb *client_pcb, err_t err)
     tcp_poll(client_pcb, tcp_server_poll, POLL_TIME_S * 2);
     tcp_err(client_pcb, tcp_server_err);
 
-    return tcp_server_send_data(arg, state->client_pcb, message);
+    return tcp_server_send_data(arg, state->client_pcb);
 }
 
 static bool tcp_server_open(void *arg) {
@@ -260,36 +248,24 @@ void run_tcp_server_test(void) {
     free(state);
 }
 
-void wifi_init()
-{
-    if (cyw43_arch_init())
-    {
-        printf("[WiFi] Failed to initialize.\n");
-        return;
+int main() {
+    stdio_init_all();
+
+    if (cyw43_arch_init()) {
+        printf("failed to initialise\n");
+        return 1;
     }
 
     cyw43_arch_enable_sta_mode();
 
-    printf("[WiFi] Connecting to WiFi...\n");
-    while (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000) != 0)
-    {
-        printf("[WiFi] Failed to connect.\n");
-        printf("[WiFi] Attempting to reconnect...");
+    printf("Connecting to Wi-Fi...\n");
+    if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000)) {
+        printf("failed to connect.\n");
+        return 1;
+    } else {
+        printf("Connected.\n");
     }
-
-    printf("[WiFi] Connected.\n");
-
     run_tcp_server_test();
     cyw43_arch_deinit();
-
-    return;
-}
-
-int main()
-{
-    stdio_init_all();
-
-    wifi_init();
-
-    return 1;
+    return 0;
 }

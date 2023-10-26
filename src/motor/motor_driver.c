@@ -137,11 +137,3 @@ void motor_driver_init()
 
     pwm_init(pwm_slice, &pwm_conf, true);
 }
-
-
-int main()
-{
-    motor_driver_init();
-    move_forward();
-    set_speed(50, 1);
-}
