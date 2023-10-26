@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
-#include "hardware_adc/pwm.h"
+#include "hardware/pwm.h"
 
 #include "motor_driver.c"
-#include "pid.c"
-
 
 void test_motor_move_forward()
 {
@@ -92,5 +90,5 @@ void test_motor_set_speed()
 
 int main()
 {
-
+    test_motor_set_speed();
 }

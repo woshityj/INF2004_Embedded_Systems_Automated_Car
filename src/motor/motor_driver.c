@@ -24,6 +24,35 @@ static uint pwm_slice;
 static uint motor_left_speed = 0;
 static uint motor_right_speed = 0;
 
+void motor_driver_init()
+{
+    printf("[Motor] Init start \n");
+
+    // Initialize GPIO Pins
+    //
+    gpio_init(GPIO_PIN_MOTOR_IN1);
+    gpio_init(GPIO_PIN_MOTOR_IN2);
+    gpio_init(GPIO_PIN_MOTOR_IN3);
+    gpio_init(GPIO_PIN_MOTOR_IN4);
+    
+    gpio_set_dir(GPIO_PIN_MOTOR_IN1, GPIO_OUT);
+    gpio_set_dir(GPIO_PIN_MOTOR_IN2, GPIO_OUT);
+    gpio_set_dir(GPIO_PIN_MOTOR_IN3, GPIO_OUT);
+    gpio_set_dir(GPIO_PIN_MOTOR_IN4, GPIO_OUT);
+
+    // Initialize PWM
+    //
+    gpio_set_function(GPIO_PIN_PWM_EN1, GPIO_FUNC_PWM);
+    gpio_set_function(GPIO_PIN_PWM_EN2, GPIO_FUNC_PWM);
+
+    pwm_slice = pwm_gpio_to_slice_num(GPIO_PIN_PWM_EN1);
+    pwm_config pwm_conf = pwm_get_default_config();
+    pwm_config_set_clkdiv_int(&pwm_conf, 100);
+    pwm_config_set_wrap(&pwm_conf, PWM_CYCLE);
+
+    pwm_init(pwm_slice, &pwm_conf, true);
+}
+
 void move_forward()
 {    
     // Left Wheel Configuration
@@ -107,41 +136,4 @@ void stop()
 {
     set_speed(0, MOTOR_LEFT);
     set_speed(0, MOTOR_RIGHT);
-}
-
-void motor_driver_init()
-{
-    printf("[Motor] Init start \n");
-
-    // Initialize GPIO Pins
-    //
-    gpio_init(GPIO_PIN_MOTOR_IN1);
-    gpio_init(GPIO_PIN_MOTOR_IN2);
-    gpio_init(GPIO_PIN_MOTOR_IN3);
-    gpio_init(GPIO_PIN_MOTOR_IN4);
-    
-    gpio_set_dir(GPIO_PIN_MOTOR_IN1, GPIO_OUT);
-    gpio_set_dir(GPIO_PIN_MOTOR_IN2, GPIO_OUT);
-    gpio_set_dir(GPIO_PIN_MOTOR_IN3, GPIO_OUT);
-    gpio_set_dir(GPIO_PIN_MOTOR_IN4, GPIO_OUT);
-
-    // Initialize PWM
-    //
-    gpio_set_function(GPIO_PIN_PWM_EN1, GPIO_FUNC_PWM);
-    gpio_set_function(GPIO_PIN_PWM_EN2, GPIO_FUNC_PWM);
-
-    pwm_slice = pwm_gpio_to_slice_num(GPIO_PIN_PWM_EN1);
-    pwm_config pwm_conf = pwm_get_default_config();
-    pwm_config_set_clkdiv_int(&pwm_conf, 100);
-    pwm_config_set_wrap(&pwm_conf, PWM_CYCLE);
-
-    pwm_init(pwm_slice, &pwm_conf, true);
-}
-
-
-int main()
-{
-    motor_driver_init();
-    move_forward();
-    set_speed(50, 1);
 }
