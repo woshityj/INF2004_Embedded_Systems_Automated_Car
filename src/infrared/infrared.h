@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #define IR_PIN_FRONT 26 // ADC 0 
 #define IR_PIN_LEFT 27 // ADC 1
 #define IR_PIN_RIGHT 28 // ADC 2
@@ -36,3 +37,18 @@ void find_top_three_timings(float arr[], float *first, float *second, float *thi
 void form_binary_array(float timing_differences[], int char_binary_array[], float first, float second, float third);
 char decode_array(int char_binary_array[]);
 void reverse_array(int arr[]);
+=======
+#ifndef infrared
+#define infrared
+
+#define IR_PIN 15
+#define MAX_TIMINGS 10
+#define MAX_TIMINGDIFFERENCES 9
+
+void IR_scan();
+void IR_init();
+void formChar(float first, float second, float third);
+void findTopThree(float arr[], float *first, float *second, float *third);
+
+#endif
+>>>>>>> origin/ultrasonic
