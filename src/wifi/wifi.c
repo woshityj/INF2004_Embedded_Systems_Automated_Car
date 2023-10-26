@@ -89,7 +89,7 @@ static err_t tcp_client_close(void *arg)
     //
     strcpy(state->buffer_recv, "");
 
-    printf("[WiFi] Closed TCP Client Connection");
+    printf("[WiFi] Closed TCP Client Connection\n");
 
     return err;
 }

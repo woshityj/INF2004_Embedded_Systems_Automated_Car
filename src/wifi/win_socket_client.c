@@ -22,7 +22,7 @@ int main()
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (iResult != NO_ERROR) {
-        wprintf(L"WSAStartup function failed with error: %d\n", iResult);
+        printf("WSAStartup function failed with error: %d\n", iResult);
         return 1;
     }
     //----------------------
@@ -30,7 +30,7 @@ int main()
     SOCKET ConnectSocket;
     ConnectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (ConnectSocket == INVALID_SOCKET) {
-        wprintf(L"socket function failed with error: %ld\n", WSAGetLastError());
+        printf("socket function failed with error: %ld\n", WSAGetLastError());
         WSACleanup();
         return 1;
     }
@@ -46,40 +46,31 @@ int main()
     // Connect to server.
     iResult = connect(ConnectSocket, (SOCKADDR *) & clientService, sizeof (clientService));
     if (iResult == SOCKET_ERROR) {
-        wprintf(L"connect function failed with error: %ld\n", WSAGetLastError());
+        printf("connect function failed with error: %ld\n", WSAGetLastError());
         iResult = closesocket(ConnectSocket);
         if (iResult == SOCKET_ERROR)
-            wprintf(L"closesocket function failed with error: %ld\n", WSAGetLastError());
+            printf("closesocket function failed with error: %ld\n", WSAGetLastError());
         WSACleanup();
         return 1;
     }
 
-    wprintf(L"Connected to server.\n");
+    printf("Connected to server.\n");
 
-    char message[BUF_SIZE], reply[BUF_SIZE];
-    for (int i = 0; i < TEST_ITERATIONS; i++){
-        printf("Test iteration number %d\n", i+1);
+    char* message = "hello testing", reply[BUF_SIZE] = {0};
 
-        // ---------------------------
-        // Receive reply from server
-        int bytesReceived = recv(ConnectSocket, reply, BUF_SIZE, 0);
-        printf("read %d bytes from server\n", bytesReceived);
-        
-        // ----------------------------
-        // Copy reply to message buffer 
-        memcpy(message, reply, BUF_SIZE);
+    // ---------------------------
+    // Send message to server
+    send(ConnectSocket, message, BUF_SIZE, 0);
+    printf("Message sent\n");
 
-        // ---------------------------
-        // Send message to server
-        send(ConnectSocket, message, BUF_SIZE, 0);
-        printf("Message sent of %d bytes\n", (sizeof(message)));
-    }
-    
-    printf("End of test\n");
+    // ---------------------------
+    // Receive reply from server
+    int bytesReceived = recv(ConnectSocket, reply, BUF_SIZE, 0);
+    printf("Message from server: %s\n", reply);
 
     iResult = closesocket(ConnectSocket);
     if (iResult == SOCKET_ERROR) {
-        wprintf(L"closesocket function failed with error: %ld\n", WSAGetLastError());
+        printf("closesocket function failed with error: %ld\n", WSAGetLastError());
         WSACleanup();
         return 1;
     }
