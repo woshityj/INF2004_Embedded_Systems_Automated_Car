@@ -102,7 +102,6 @@ Directions* get_directions(int currentlyFacing)
 //
 bool IR_barcode_scan(struct repeating_timer *t)
 {
-    static bool scanReady = true;
     static bool flag = true;
     static int currentIndex = 0;
 
@@ -111,13 +110,6 @@ bool IR_barcode_scan(struct repeating_timer *t)
     static int char_binary_array[TIMINGDIFFERENCES_BUFFERSIZE];
 
     adc_select_input(0);
-
-    if (!scanReady)
-    {
-        scanReady = true;
-        flag = true;
-        return true;
-    }
     
     // Check if bar is black
     //
@@ -154,17 +146,20 @@ bool IR_barcode_scan(struct repeating_timer *t)
 
         // Decode the binary array
         //
+        print_array(char_binary_array);
         char decoded_character = decode_array(char_binary_array);
+        printf("Normal decode: ");
         printf("%c\n",decoded_character);
 
         // Decode the reverse binary array
         //
         reverse_array(char_binary_array);
+        print_array(char_binary_array);
         char decoded_character_reverse = decode_array(char_binary_array);
+        printf("Backwards decode: ");
         printf("%c\n",decoded_character_reverse);
 
         currentIndex = 0;
-        scanReady = false;
     }
     
     return true;
@@ -222,6 +217,16 @@ void form_binary_array(float timing_differences[], int char_binary_array[], floa
             char_binary_array[i] = 0;
         }
     }
+}
+
+void print_array(int arr[])
+{
+    for (int i = 0; i < BINARYARRAY_BUFFERSIZE; i++)
+    {
+        printf("%d", arr[i]);
+    }
+    printf("\n");
+
 }
 
 // Functoion to decode binary array into a character
