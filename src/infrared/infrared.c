@@ -72,6 +72,7 @@ Directions* get_directions(int currentlyFacing)
             adc_select_input(ADC_FRONT);
             dir->east = adc_read();
             dir->west = NULL;
+            break;
         // West
         //
         case 4:
