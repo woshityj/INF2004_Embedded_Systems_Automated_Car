@@ -36,105 +36,161 @@
 //
 #define WHEEL_CIRCUMFERENCE_CM (M_PI * WHEEL_DIAMETER_CM)
 
-volatile int newTime = 0;
-volatile int oldTime = 0;
-volatile int pulseTime = 0;
+struct repeating_timer timer;
 
-// Wheel speed calculation
-volatile int encIndex = 0;
-volatile int leftInterruptBuffer[INTERRUPT_BUF_SIZE];
-volatile int rightInterruptBuffer[INTERRUPT_BUF_SIZE];
+volatile uint32_t leftNewTime = 0;
+volatile uint32_t leftOldTime = 0;
+volatile uint32_t leftPulseTime = 0;
+
+volatile uint32_t rightNewTime = 0;
+volatile uint32_t rightOldTime = 0;
+volatile uint32_t rightPulseTime = 0;
+
+volatile uint32_t left_interrupts = 0;
+volatile uint32_t right_interrupts = 0;
 
 /*!
-*	@brief	            This callback function is called when the Encoder Sensor is interrupted (low)
+*	@brief	            This callback function is called when the Encoder Sensor is high (Edge Rise)
 *                       or when the Encoder Sensor senses the split from the Wheel passing its IR emitter
-*                       and receiver
+*                       and receiver and adds to a counter that counts the number of splits
 *   @param[in]  gpio    Contains the GPIO number to identify which Encoder Sensor called the callback function.
 *   @param[in]  events  Contains which events caused the callback function to be called
-*                       which is an Edge Fall.
+*                       which is an Edge Rise.
 */
 void gpio_callback_isr(uint gpio, uint32_t events)
 {
     if (gpio == GPIO_PIN_ENC_LEFT)
     {
-        leftInterruptBuffer[encIndex]++;
+        leftOldTime = leftNewTime;
+        leftNewTime = time_us_32();
+
+        left_interrupts += 1;
     }
 
     if (gpio == GPIO_PIN_ENC_RIGHT)
     {
-        rightInterruptBuffer[encIndex]++;
+        rightOldTime = rightNewTime;
+        rightNewTime = time_us_32();
+
+        right_interrupts += 1;
     }
 }
 
-bool repeating_timer_callback_isr(struct repeating_timer *t)
+/*!
+*	@brief	            This function calculates the number of rotations (360 degress) that the specified
+*                       Wheel Encoder Sensor detects based on the amount of time the IR emitter and
+*                       receiver was blocked for which resulted in a low
+*   @param[in]  gpio    Contains the GPIO number to identify which Encoder Sensor to get the RPM for
+*	@return             Returns number of rotations per minute for the specified Wheel Encoder Sensor
+*/
+int get_wheel_rpm(uint gpio)
 {
-    encIndex++;
-    if (encIndex == INTERRUPT_BUF_SIZE)
-        encIndex = 0;
-    leftInterruptBuffer[encIndex] = 0;
-    rightInterruptBuffer[encIndex] = 0;
-    return true;
-}
-
-int get_wheel_interrupt_speed(uint gpio)
-{
-    int total = 0;
     if (gpio == GPIO_PIN_ENC_LEFT)
     {
-        for (int i = 0; i < INTERRUPT_BUF_SIZE; i++)
+        if (leftNewTime != 0)
         {
-            if (i == encIndex)
-                continue;
-            total += leftInterruptBuffer[i];
+            leftPulseTime = leftNewTime - leftOldTime;
+
+            if (leftPulseTime < (time_us_32() - leftNewTime))
+            {
+                leftPulseTime = time_us_32() - leftNewTime;
+            }
+
+            int rpm = 30000000 / leftPulseTime;
+
+            return rpm;
         }
     }
-    else if (gpio == GPIO_PIN_ENC_RIGHT)
+
+    if (gpio == GPIO_PIN_ENC_RIGHT)
     {
-        for (int i = 0; i < INTERRUPT_BUF_SIZE; i++)
+        if (rightNewTime != 0)
         {
-            if (i == encIndex)
-                continue;
-            total += rightInterruptBuffer[i];
+            rightPulseTime = rightNewTime - rightOldTime;
+
+            if (rightPulseTime < (time_us_32() - rightNewTime))
+            {
+                rightPulseTime = time_us_32() - rightNewTime;
+            }
+
+            int rpm = 30000000 / rightPulseTime;
+
+            return rpm;
         }
     }
-    return total;
+
+    return 0;
 }
 
-float get_wheel_speed(uint gpio)
+/*!
+*	@brief	            This function calculates the speed of the specified Wheel Encoder Sensor based
+*                       on the rotations per minute
+*   @param[in]  gpio    Contains the GPIO number to identify which Encoder Sensor to get the speed for
+*	@return             Returns the speed in KM/H for the specified Wheel Encoder Sensor
+*/
+int get_wheel_speed(uint gpio)
 {
-    int interrupts_per_sec = get_wheel_interrupt_speed(gpio);
-    return interrupts_per_sec * CM_PER_SLOT;
+    int rpm = get_wheel_rpm(gpio);
+
+    int speed = (rpm * WHEEL_CIRCUMFERENCE_CM) * 60;
+    speed = speed / 100000;
+
+    return speed;
 }
+
+/*!
+*	@brief	            This function calculates the distance that the specified Wheel Encoder Sensor
+*                       travelled for
+*   @param[in]  gpio    Contains the GPIO number to identify which Encoder Sensor to get the distance for
+*	@return             Returns the distance in CM for the specified Wheel Encoder Sensor
+*/
+float get_wheel_distance(uint gpio)
+{
+    if (gpio == GPIO_PIN_ENC_LEFT)
+    {
+        float distance = left_interrupts * CM_PER_SLOT;
+        printf("[Testing] Left interrupts :%d\n", left_interrupts);
+
+        return distance;       
+    }
+
+    if (gpio == GPIO_PIN_ENC_RIGHT)
+    {
+        float distance = right_interrupts * CM_PER_SLOT;
+
+        return distance;
+    }
+
+    return 0;
+}
+
 
 void encoder_driver_init()
-{   
+{
     printf("[Encoder] Init start\n");
 
-    struct repeating_timer timer;
-
-    add_repeating_timer_ms(-250, &repeating_timer_callback_isr, NULL, &timer);
-
-    gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_LEFT, GPIO_IRQ_EDGE_FALL, true, &gpio_callback_isr);
-    gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_RIGHT, GPIO_IRQ_EDGE_FALL, true, &gpio_callback_isr);
+    gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_LEFT, GPIO_IRQ_EDGE_RISE, true, &gpio_callback_isr);
+    gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_RIGHT, GPIO_IRQ_EDGE_RISE, true, &gpio_callback_isr);
 }
 
 
 int main()
 {
     stdio_usb_init();
-
+    motor_driver_init();
     encoder_driver_init();
-    // motor_driver_init();
-    // move_forward();
-    // set_speed(100, 1);
-
+    move_forward();
+    set_speed(100, 1);
 
     while(true)
     {
-        // float speed = get_wheel_speed(GPIO_PIN_ENC_LEFT);
-        // printf("Speed is %0.2f cm/s\n", speed);
-        printf("semen\n");
+        int speed = get_wheel_speed(2);
+        printf("Speed is %d km/h\n", speed);
 
-        sleep_ms(1000);
+
+        sleep_ms(5000);
+
+        float distance = get_wheel_distance(2);
+        printf("Distance travelled is: %0.2f cm\n", distance);
     }
 }

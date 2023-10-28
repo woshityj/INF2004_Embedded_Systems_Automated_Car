@@ -18,9 +18,9 @@
 const float CM_PER_SLOT = WHEEL_CIRCUMFERENCE_CM / ENCODER_DISC_SLOTS;
 
 void gpio_callback_isr(uint gpio, uint32_t events);
-bool repeating_timer_callback_isr(struct repeating_timer *t);
-int get_wheel_interrupt_speed(uint gpio);
-float get_wheel_speed(uint gpio);
+int get_wheel_rpm(uint gpio);
+int get_wheel_speed(uint gpio);
+float get_wheel_distance(uint gpio);
 void encoder_driver_init();
 
 #endif
