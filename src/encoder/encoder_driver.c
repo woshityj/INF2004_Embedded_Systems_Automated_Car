@@ -15,7 +15,6 @@
 #include "pico/time.h"
 
 #include "encoder_driver.h"
-#include "../motor/motor_driver.c"
 
 // Pins connected to each sensors's OUT pin.
 //
@@ -171,26 +170,4 @@ void encoder_driver_init()
 
     gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_LEFT, GPIO_IRQ_EDGE_RISE, true, &gpio_callback_isr);
     gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_RIGHT, GPIO_IRQ_EDGE_RISE, true, &gpio_callback_isr);
-}
-
-
-int main()
-{
-    stdio_usb_init();
-    motor_driver_init();
-    encoder_driver_init();
-    move_forward();
-    set_speed(100, 1);
-
-    while(true)
-    {
-        int speed = get_wheel_speed(2);
-        printf("Speed is %d km/h\n", speed);
-
-
-        sleep_ms(5000);
-
-        float distance = get_wheel_distance(2);
-        printf("Distance travelled is: %0.2f cm\n", distance);
-    }
 }
