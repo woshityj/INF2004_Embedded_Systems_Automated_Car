@@ -72,6 +72,7 @@ Directions* get_directions(int currentlyFacing)
             adc_select_input(ADC_FRONT);
             dir->east = adc_read();
             dir->west = NULL;
+            break;
         // West
         //
         case 4:
@@ -102,22 +103,22 @@ Directions* get_directions(int currentlyFacing)
 //
 bool IR_barcode_scan(struct repeating_timer *t)
 {
-    static bool scanReady = true;
     static bool flag = true;
+    static bool validBarcode = false;
+    static bool isBackwards = false;
+    static bool charDetected = false;
     static int currentIndex = 0;
+
+    static char decoded_character;
+    static char decoded_character_reverse;
+
+    static char barcode_char;
 
     static float timings[TIMING_BUFFERSIZE];
     static float timing_differences[TIMINGDIFFERENCES_BUFFERSIZE];
     static int char_binary_array[TIMINGDIFFERENCES_BUFFERSIZE];
 
     adc_select_input(0);
-
-    if (!scanReady)
-    {
-        scanReady = true;
-        flag = true;
-        return true;
-    }
     
     // Check if bar is black
     //
@@ -152,19 +153,94 @@ bool IR_barcode_scan(struct repeating_timer *t)
         find_top_three_timings(timing_differences, &first, &second, &third);
         form_binary_array(timing_differences, char_binary_array, first, second, third);
 
-        // Decode the binary array
+        // Check for valid barcode
         //
-        char decoded_character = decode_array(char_binary_array);
-        printf("%c\n",decoded_character);
+        if (!validBarcode)
+        {   
+            // Decode the binary array
+            //
+            decoded_character = decode_array(char_binary_array);
 
-        // Decode the reverse binary array
+            // Decode the reverse binary array
+            //
+            reverse_array(char_binary_array);
+            decoded_character_reverse = decode_array(char_binary_array);
+
+            if (decoded_character == '*')
+            {
+                validBarcode = true;
+                printf("Valid barcode detected\n");
+            }
+            else if (decoded_character_reverse == '*')
+            {
+                validBarcode = true;
+                isBackwards = true;
+                printf("Valid barcode detected\n");
+            }
+            else
+            {
+                printf("Error reading barcode OR Invalid barcode detected\n");
+            }
+        }
+        // Read the character
         //
-        reverse_array(char_binary_array);
-        char decoded_character_reverse = decode_array(char_binary_array);
-        printf("%c\n",decoded_character_reverse);
+        else if (!charDetected)
+        {
+            charDetected = true;
+
+            if (isBackwards)
+            {
+                reverse_array(char_binary_array);
+                decoded_character_reverse = decode_array(char_binary_array);
+                barcode_char = decoded_character_reverse;
+            }
+            else
+            {
+                decoded_character = decode_array(char_binary_array);
+                barcode_char = decoded_character;
+            }
+        }
+        // Detect end of barcode to check for valid barcode and reset all flags and variables
+        //
+        else
+        {   
+            if (isBackwards)
+            {
+                reverse_array(char_binary_array);
+                decoded_character_reverse = decode_array(char_binary_array);
+                
+                if (decoded_character_reverse != '*')
+                {
+                    printf("Error reading barcode OR Invalid barcode detected\n");
+                }
+                else
+                {
+                    printf("%c", barcode_char);
+                }
+            }
+            else
+            {
+                decoded_character = decode_array(char_binary_array);
+
+                if (decoded_character != '*')
+                {
+                    printf("Error reading barcode OR Invalid barcode detected\n");
+                }
+                else
+                {
+                    printf("Character = %c\n", barcode_char);
+                }
+            }
+
+            // Reset all variables
+            //
+            flag = true;
+            validBarcode = false;
+            isBackwards = false;
+            charDetected = false;
+        }
 
         currentIndex = 0;
-        scanReady = false;
     }
     
     return true;
@@ -222,6 +298,16 @@ void form_binary_array(float timing_differences[], int char_binary_array[], floa
             char_binary_array[i] = 0;
         }
     }
+}
+
+void print_array(int arr[])
+{
+    for (int i = 0; i < BINARYARRAY_BUFFERSIZE; i++)
+    {
+        printf("%d", arr[i]);
+    }
+    printf("\n");
+
 }
 
 // Functoion to decode binary array into a character
