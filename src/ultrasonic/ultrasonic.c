@@ -4,14 +4,7 @@
 #include "hardware/gpio.h"
 #include "hardware/timer.h"
 
-// #include "ultrasonic.h"
-
-// #define SPEED_OF_SOUND 343 / 1000000 // meters per microsecond
-// #define DIFFERENCE(a, b) (a<b ? (b-a) : (a-b))
-
-#define TRIGGER_PIN 14
-#define ECHO_PIN 15
-#define SAMPLING_RATE 30
+#include "ultrasonic.h"
 
 int timeout = 26100;
 
@@ -107,8 +100,8 @@ int main(void)
             float centimeters = getPulse();
             printf("The distance is: %.2f\n", centimeters);
         }
-        // You can uncomment the sleep_ms(100) away to get more accurate and slower readings
-        // sleep_ms(100); 
+        // You can comment the sleep_ms(100) to limit test, but it won't be as accurate because the sound waves can't travel fast enough
+        sleep_ms(100); 
         // the sleep here is obviously just for testing, in the implementation it'll be replaced with vTask delays or function calls with delayUntil
     }
 }
