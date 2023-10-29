@@ -21,8 +21,6 @@
 #define GPIO_PIN_ENC_LEFT 2
 #define GPIO_PIN_ENC_RIGHT 3
 
-#define INTERRUPT_BUF_SIZE 5
-
 // Number of disc slots the Wheel has
 //
 #define ENCODER_DISC_SLOTS 20
@@ -34,19 +32,6 @@
 // Circumference of the Wheel
 //
 #define WHEEL_CIRCUMFERENCE_CM (M_PI * WHEEL_DIAMETER_CM)
-
-struct repeating_timer timer;
-
-volatile uint32_t leftNewTime = 0;
-volatile uint32_t leftOldTime = 0;
-volatile uint32_t leftPulseTime = 0;
-
-volatile uint32_t rightNewTime = 0;
-volatile uint32_t rightOldTime = 0;
-volatile uint32_t rightPulseTime = 0;
-
-volatile uint32_t left_interrupts = 0;
-volatile uint32_t right_interrupts = 0;
 
 /*!
 *	@brief	            This callback function is called when the Encoder Sensor is high (Edge Rise)
@@ -163,7 +148,10 @@ float get_wheel_distance(uint gpio)
     return 0;
 }
 
-
+/*!
+*	@brief      This function initializes GPIO callback functions
+*               for both the Left and Right Encoders
+*/
 void encoder_driver_init()
 {
     printf("[Encoder] Init start\n");
