@@ -1,5 +1,5 @@
 add_executable(encoder_driver
-        encoder_driver.c
+        main.c
         )
 
 target_link_libraries(encoder_driver pico_stdlib)

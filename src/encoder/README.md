@@ -1,10 +1,32 @@
-#ifndef ENCODER_H_
-#define ENCODER_H_
+## Encoder Driver Module
 
-#include <stdio.h>
-#include <math.h>
-#include "pico/stdlib.h"
-#include "pico/time.h"
+### Introduction
+
+This sub-module library contains:
+
+1. Encoder Logic `encoder_driver.c`
+
+### Objectives
+The objective of the WYC-H206 IR Encoder Driver Module is to create abstracted functions to allow developers call upon this module to determine the speed of the wheel via Pulse Width and the distance that the wheel has travelled for by counting the number of splits within the rotary.
+
+### Explanation
+
+This library provides an interface to the encoder through a WYC-H206 encoder driver.
+
+To determine the speed of the wheel using Pulse Width, time in microseconds is calculated for each pulse duration from when the the IR receiver is not blocked to when the IR receiver is blocked and unblocked again.
+
+Based on the pulse duration, we are able to retrieve the amount of rotations per minute and derive the speed of the wheel by making use of the circumference of the rotary.
+
+To determine the distance travelled, each time the IR receiver is unblocked, a counter is incremented. By making use of the length of each split, we can determine the distance travelled by taking the split in CM and multiplying it with the counter.
+
+### Flowchart
+
+-- To be included --
+
+### Header Files
+
+Definitions in `encoder_driver.h`:
+```c
 
 // GPIO Pin 2 to read the status of the Left Encoder
 //
@@ -74,5 +96,4 @@ float get_wheel_distance(uint gpio);
 // for the encoder driver
 //
 void encoder_driver_init();
-
-#endif
+```

@@ -1,5 +1,5 @@
 add_executable(motor_driver
-        motor_driver.c
+        main.c
         )
 
 add_library(pid pid.c)
