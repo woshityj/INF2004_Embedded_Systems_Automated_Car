@@ -32,6 +32,9 @@ void initializeUltrasonic(unsigned char triggerPin, unsigned char echoPin)
 
     gpio_set_dir(triggerPin, GPIO_OUT);
     gpio_set_dir(echoPin, GPIO_IN);
+
+    gpio_set_irq_enabled_with_callback(ECHO_PIN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &echo_interrupt); //enable interrupts by the echo pin
+    add_repeating_timer_ms(SAMPLING_RATE, pullTrigger, NULL, &timer); // Happens to be near 30Hz by setting it to be -30
 }
 
 int64_t alarm_pulldown_callback(alarm_id_t id, void *user_data)
@@ -67,29 +70,4 @@ bool pullTrigger(struct repeating_timer *t) // repeating timer to periodically c
     add_alarm_in_us(15, &alarm_pulldown_callback, NULL, false);
 
     return true;
-}
-
-int main(void)
-{
-    stdio_init_all();
-
-    // sleep for time to turn on serial monitor
-    sleep_ms(3000);
-    printf("initializing the sensors\n");
-
-    initializeUltrasonic(TRIGGER_PIN, ECHO_PIN);
-
-    gpio_set_irq_enabled_with_callback(ECHO_PIN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &echo_interrupt); //enable interrupts by the echo pin
-    add_repeating_timer_ms(-SAMPLING_RATE, pullTrigger, NULL, &timer); // Happens to be near 30Hz by setting it to be -30
-
-    // Just for testing purposes to show the usage, will be abstracted away for tasks, this while loop simulates tasks that don't have a return
-    while(true)
-    {
-        if(endTime > startTime)
-        {
-            unsigned short millimeters = getMM();
-            printf("The distance is: %dmm\n", millimeters);
-        }
-        sleep_us(15);
-    }
 }

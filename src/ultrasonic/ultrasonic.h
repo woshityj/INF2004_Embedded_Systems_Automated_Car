@@ -6,6 +6,12 @@
 #define SAMPLING_RATE 30
 #define TIMEOUT 26100
 
+#include <stdio.h>
+#include "pico/stdlib.h"
+#include <stdbool.h>
+#include "hardware/gpio.h"
+#include "hardware/timer.h"
+
 void initializeUltrasonic(unsigned char triggerPin, unsigned char echoPin);
 void echo_interrupt(uint gpio, uint32_t events);
 bool pullTrigger(struct repeating_timer *t);
