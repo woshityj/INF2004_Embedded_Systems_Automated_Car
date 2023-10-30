@@ -6,10 +6,11 @@
 #define SAMPLING_RATE 30
 #define TIMEOUT 26100
 
-void initializeUltrasonic(uint triggerPin, uint echoPin);
+void initializeUltrasonic(unsigned char triggerPin, unsigned char echoPin);
 void echo_interrupt(uint gpio, uint32_t events);
+bool pullTrigger(struct repeating_timer *t);
+unsigned short getMM();
 int64_t alarm_pulldown_callback(alarm_id_t id, void *user_data);
-int getMM();
 
 absolute_time_t startTime;
 absolute_time_t endTime;

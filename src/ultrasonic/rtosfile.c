@@ -1,19 +1,23 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
-#include <stdbool.h>
+#include "FreeRTOS.h"
+#include "task.h"
+#include "message_buffer.h"
 #include "hardware/gpio.h"
-#include "hardware/timer.h"
-
+#include "hardware/adc.h"
+#include "FreeRTOS.h"
 #include "ultrasonic.h"
 
+
+#define TEST_TASK_PRIORITY				( tskIDLE_PRIORITY + 1UL )
 struct repeating_timer timer;
 // Abstracted task returns
 // to be done
 
-unsigned short getMM()
+int getMM()
 {
     pulseLength = absolute_time_diff_us(startTime, endTime); // get the echo pin return wave form length
-    unsigned short milliimeters = pulseLength / 6;
+    int milliimeters = pulseLength / 6;
     if(milliimeters < 20 || milliimeters > 4000 || pulseLength >= TIMEOUT) // range of the HC-SR04P
     {
         milliimeters = 0; // if out of range then just assume that it was a 0
@@ -24,7 +28,7 @@ unsigned short getMM()
     return milliimeters;
 }
 
-void initializeUltrasonic(unsigned char triggerPin, unsigned char echoPin)
+void initializeUltrasonic(uint triggerPin, uint echoPin)
 {
     // pin initializings
     gpio_init(triggerPin);
@@ -59,7 +63,7 @@ void echo_interrupt(uint gpio, uint32_t events)
     }
 }
 
-bool pullTrigger(struct repeating_timer *t) // repeating timer to periodically call the 
+bool pullTrigger(struct repeating_timer *t)
 {
     gpio_put(TRIGGER_PIN, 1);
 
@@ -69,27 +73,58 @@ bool pullTrigger(struct repeating_timer *t) // repeating timer to periodically c
     return true;
 }
 
-int main(void)
+void main_task(__unused void *params)
 {
-    stdio_init_all();
-
-    // sleep for time to turn on serial monitor
-    sleep_ms(3000);
     printf("initializing the sensors\n");
 
     initializeUltrasonic(TRIGGER_PIN, ECHO_PIN);
 
-    gpio_set_irq_enabled_with_callback(ECHO_PIN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &echo_interrupt); //enable interrupts by the echo pin
-    add_repeating_timer_ms(-SAMPLING_RATE, pullTrigger, NULL, &timer); // Happens to be near 30Hz by setting it to be -30
+    gpio_set_irq_enabled_with_callback(ECHO_PIN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &echo_interrupt);
+    add_repeating_timer_ms(-SAMPLING_RATE, pullTrigger, NULL, &timer);
 
-    // Just for testing purposes to show the usage, will be abstracted away for tasks, this while loop simulates tasks that don't have a return
     while(true)
     {
         if(endTime > startTime)
         {
-            unsigned short millimeters = getMM();
+            int millimeters = getMM();
             printf("The distance is: %dmm\n", millimeters);
         }
-        sleep_us(15);
+        vTaskDelay(1);
     }
+}
+void vLaunch(void)
+{
+
+    TaskHandle_t ultrasonicTask;
+    xTaskCreate(main_task, "ultrasonic Sensor", configMINIMAL_STACK_SIZE, NULL, TEST_TASK_PRIORITY, &ultrasonicTask);
+    vTaskCoreAffinitySet(ultrasonicTask, 0x3);
+
+    vTaskStartScheduler();
+}
+
+int main(void)
+{
+    // Initialization
+    stdio_init_all();
+
+    const char *rtos_name;
+#if ( portSUPPORT_SMP == 1 )
+    rtos_name = "FreeRTOS SMP";
+#else
+    rtos_name = "FreeRTOS";
+#endif
+
+#if ( portSUPPORT_SMP == 1 ) && ( configNUM_CORES == 2 )
+    sleep_ms(5000);
+    printf("Starting %s on both cores:\n", rtos_name);
+    vLaunch();
+#elif ( RUN_FREERTOS_ON_CORE == 1 )
+    printf("Starting %s on core 1:\n", rtos_name);
+    multicore_launch_core1(vLaunch);
+    while (true);
+#else
+    printf("Starting %s on core 0:\n", rtos_name);
+    vLaunch();
+#endif
+    return 0;
 }
