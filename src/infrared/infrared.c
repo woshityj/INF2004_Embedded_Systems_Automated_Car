@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <float.h>
 
 #include "hardware/adc.h"
 #include "infrared.h"
@@ -10,7 +9,11 @@
 
 #include "pico/stdlib.h"
 
-bool detect_wall()
+
+// Helper function to read from an adc input, and check whether the sensor is 
+// on a line or not
+// 
+bool detect_line()
 {
     // Line detected
     //
@@ -18,6 +21,8 @@ bool detect_wall()
     {
         return true;
     }
+    // Line not detected
+    //
     else
     {
         return false;
@@ -25,6 +30,9 @@ bool detect_wall()
     
 }
 
+// Function to read the IR sensor based on the direction the motor vehicle is 
+// currently facing and populate the relevant directions ( North, South, East , West )
+//
 Directions* get_directions(int currentlyFacing)
 {
     Directions* dir = (Directions*)malloc(sizeof(Directions));
@@ -35,6 +43,8 @@ Directions* get_directions(int currentlyFacing)
         exit(1);
     }
 
+    // Populate the struct based on the direction the motor vehicle is currently facing
+    //
     switch(currentlyFacing)
     {
         // North
@@ -42,10 +52,10 @@ Directions* get_directions(int currentlyFacing)
         case 1:
             dir->currentlyFacing = currentlyFacing;
             adc_select_input(ADC_FRONT);
-            dir->north = detect_wall();
+            dir->north = detect_line();
             dir->south = NULL;
             adc_select_input(ADC_RIGHT);
-            dir->east = detect_wall();
+            dir->east = detect_line();
             adc_select_input(ADC_LEFT);
             dir->west = adc_read();
             break;
@@ -55,9 +65,9 @@ Directions* get_directions(int currentlyFacing)
             dir->currentlyFacing = currentlyFacing;
             dir->north = NULL;
             adc_select_input(ADC_FRONT);
-            dir->south = detect_wall();
+            dir->south = detect_line();
             adc_select_input(ADC_RIGHT);
-            dir->east = detect_wall();
+            dir->east = detect_line();
             adc_select_input(ADC_LEFT);
             dir->west = adc_read();
             break;
@@ -66,9 +76,9 @@ Directions* get_directions(int currentlyFacing)
         case 3:
             dir->currentlyFacing = currentlyFacing;
             adc_select_input(ADC_LEFT);
-            dir->north = detect_wall();
+            dir->north = detect_line();
             adc_select_input(ADC_RIGHT);
-            dir->south = detect_wall();
+            dir->south = detect_line();
             adc_select_input(ADC_FRONT);
             dir->east = adc_read();
             dir->west = NULL;
@@ -78,9 +88,9 @@ Directions* get_directions(int currentlyFacing)
         case 4:
             dir->currentlyFacing = currentlyFacing;
             adc_select_input(ADC_RIGHT);
-            dir->north = detect_wall();
+            dir->north = detect_line();
             adc_select_input(ADC_LEFT);
-            dir->south = detect_wall();
+            dir->south = detect_line();
             dir->east = NULL;
             adc_select_input(ADC_FRONT);
             dir->west = adc_read();
@@ -99,27 +109,70 @@ Directions* get_directions(int currentlyFacing)
     return dir;
 }
 
-// Callback for repeating timer to scan barcode
+// Callback function used by the repeating timer to scan the barcode
 //
 bool IR_barcode_scan(struct repeating_timer *t)
 {
+    // Static variables to store the moving average of the IR sensor
+    //
+    static int movingAvg_data[NUMBER_OF_SAMPLES] = {0};
+    static int movingAvg_index = 0;
+    static int movingAvg_count = 0;
+    static int movingAvg_sum = 0;
+    static int movingAvg_result = 0;
+
+    // Static variables to keep track of the state of the barcode scanner
+    //
     static bool flag = true;
+    static bool validBarcode = false;
+    static bool isBackwards = false;
+    static bool charDetected = false;
     static int currentIndex = 0;
 
-    static float timings[TIMING_BUFFERSIZE];
-    static float timing_differences[TIMINGDIFFERENCES_BUFFERSIZE];
+    // Static variables to store the decoded character and the reverse decoded character
+    //
+    static char decoded_character;
+    static char decoded_character_reverse;
+
+    // Static variable to store the character that is detected
+    //
+    static char barcode_char;
+
+    // Static arrays to store the timings, timing differences and binary array
+    //
+    static uint64_t timings[TIMING_BUFFERSIZE];
+    static uint64_t timing_differences[TIMINGDIFFERENCES_BUFFERSIZE];
     static int char_binary_array[TIMINGDIFFERENCES_BUFFERSIZE];
 
+    // Select IR sensor to read from
+    //
     adc_select_input(0);
-    
+
+    // Calculate moving average
+    //
+    movingAvg_sum -= movingAvg_data[movingAvg_index];
+    movingAvg_data[movingAvg_index] = adc_read();
+    movingAvg_sum += movingAvg_data[movingAvg_index];
+    movingAvg_index = (movingAvg_index + 1) % NUMBER_OF_SAMPLES;
+
+    if (movingAvg_count < NUMBER_OF_SAMPLES) movingAvg_count++;
+
+    movingAvg_result = movingAvg_sum/movingAvg_count;
+
     // Check if bar is black
     //
-    if (adc_read() > 1500)
+    if (movingAvg_result > 1000)
     {
+
+        // If flag is true, then the previous bar was white, so store the time
+        //
         if (flag)
         {
+
+            // Set flag to false to prevent time storing for the same bar
+            //
             flag = false;
-            timings[currentIndex] = to_us_since_boot(get_absolute_time());
+            timings[currentIndex] = time_us_64();
             currentIndex+=1;
         }
     }
@@ -127,10 +180,12 @@ bool IR_barcode_scan(struct repeating_timer *t)
     //
     else
     {
+        // If flag is false, then the previous bar was black, so store the time
+        //
         if (!flag)
         {
             flag = true;
-            timings[currentIndex] = to_us_since_boot(get_absolute_time());
+            timings[currentIndex] = time_us_64();
             currentIndex += 1;
         }
     }
@@ -139,27 +194,137 @@ bool IR_barcode_scan(struct repeating_timer *t)
     //
     if (currentIndex == TIMING_BUFFERSIZE)
     {
-        float first, second, third;
 
+        // Variables to store the top 3 timings
+        //
+        uint64_t first, second, third;
+
+        // Call helper function for data manipulation in arrays
+        //
         calculate_timing_difference(timings, timing_differences);
         find_top_three_timings(timing_differences, &first, &second, &third);
         form_binary_array(timing_differences, char_binary_array, first, second, third);
 
-        // Decode the binary array
+        // Check for valid barcode
         //
-        print_array(char_binary_array);
-        char decoded_character = decode_array(char_binary_array);
-        printf("Normal decode: ");
-        printf("%c\n",decoded_character);
+        if (!validBarcode)
+        {   
+            // Decode the binary array
+            //
+            decoded_character = decode_array(char_binary_array);
 
-        // Decode the reverse binary array
+            // Decode the reverse binary array
+            //
+            reverse_array(char_binary_array);
+            decoded_character_reverse = decode_array(char_binary_array);
+
+            // Check if the barcode starts with *, which means valid
+            //
+            if (decoded_character == '*')
+            {
+                validBarcode = true;
+                printf("Valid barcode detected\n");
+            }
+            // Check if the barcode is being scanned backwards and starts with *, which means valid
+            //
+            else if (decoded_character_reverse == '*')
+            {
+                validBarcode = true;
+                isBackwards = true;
+                printf("Valid barcode detected\n");
+            }
+            // Invalid barcode detected
+            //
+            else
+            {
+                printf("Error reading barcode OR Invalid barcode detected\n");
+            }
+        }
+        // Read the character
         //
-        reverse_array(char_binary_array);
-        print_array(char_binary_array);
-        char decoded_character_reverse = decode_array(char_binary_array);
-        printf("Backwards decode: ");
-        printf("%c\n",decoded_character_reverse);
+        else if (!charDetected)
+        {
+            // Set flag to true to identify that barcode character has been detected
+            //
+            charDetected = true;
 
+            // Check if barcode is being scanned backwards
+            //
+            if (isBackwards)
+            {
+                // Reverse the binary array and decode it
+                //
+                reverse_array(char_binary_array);
+                decoded_character_reverse = decode_array(char_binary_array);
+                barcode_char = decoded_character_reverse;
+            }
+            // Barcode is being scanned normally
+            //
+            else
+            {
+                // Decode the binary array
+                //
+                decoded_character = decode_array(char_binary_array);
+                barcode_char = decoded_character;
+            }
+        }
+        // Detect end of barcode to check for valid barcode and reset all flags and variables
+        //
+        else
+        {   
+            // Check if barcode is being scanned backwards
+            //
+            if (isBackwards)
+            {
+                // Reverse the binary array and decode it
+                //
+                reverse_array(char_binary_array);
+                decoded_character_reverse = decode_array(char_binary_array);
+                
+                // Check for * to identify valid barcode, if invalid print error message
+                //
+                if (decoded_character_reverse != '*')
+                {
+                    printf("Error reading barcode OR Invalid barcode detected\n");
+                }
+                // Valid barcode, print the character
+                //
+                else
+                {
+                    printf("Character = %c\n", barcode_char);
+                }
+            }
+            // Barcode is being scanned normally
+            //
+            else
+            {
+                // Decode the binary array
+                //
+                decoded_character = decode_array(char_binary_array);
+
+                // Check for * to identify valid barcode, if invalid print error message
+                //
+                if (decoded_character != '*')
+                {
+                    printf("Error reading barcode OR Invalid barcode detected\n");
+                }
+                // Valid barcode, print the character
+                //
+                else
+                {
+                    printf("Character = %c\n", barcode_char);
+                }
+            }
+
+            // Reset all variables
+            //
+            flag = true;
+            validBarcode = false;
+            isBackwards = false;
+            charDetected = false;
+        }
+        // Reset the index
+        //
         currentIndex = 0;
     }
     
@@ -167,25 +332,24 @@ bool IR_barcode_scan(struct repeating_timer *t)
     
 }
 
-// Function to calculate the timing differences between 2 state change points and store them into an array
+// Helper function to calculate the timing difference between 2 timings based on a given array 
+// and use the results to populate another array
 //
-void calculate_timing_difference(float timings[], float timing_differences[])
+void calculate_timing_difference(uint64_t timings[], uint64_t timing_differences[])
 {
     for (int i = 0; i < TIMINGDIFFERENCES_BUFFERSIZE; i++)
     {
-        double first_timing_s = timings[i]/1000000.0;
-        double second_timing_s = timings[i+1]/1000000.0;
-        timing_differences[i] = second_timing_s - first_timing_s;
+        timing_differences[i] = timings[i+1] - timings[i];
     }
 }
 
-// Function to find the top 3 timings of an array
+// Helper function to find the top 3 timings in an array
 //
-void find_top_three_timings(float arr[], float *first, float *second, float *third)
+void find_top_three_timings(uint64_t arr[], uint64_t *first, uint64_t *second, uint64_t *third)
 {
-    *first = FLT_MIN;
-    *second = FLT_MIN;
-    *third = FLT_MIN;
+    *first = 0;
+    *second = 0;
+    *third = 0;
 
     for (int i = 0; i < TIMINGDIFFERENCES_BUFFERSIZE; i++)
     {
@@ -205,9 +369,9 @@ void find_top_three_timings(float arr[], float *first, float *second, float *thi
     }
 }
 
-// Function to form transform form a binary array based on the timing difference array
+// Helper function to convert the timing_differences array to a binary array
 //
-void form_binary_array(float timing_differences[], int char_binary_array[], float first, float second, float third)
+void form_binary_array(uint64_t timing_differences[], int char_binary_array[], uint64_t first, uint64_t second, uint64_t third)
 {
     for (int i = 0; i < BINARYARRAY_BUFFERSIZE; i++) {
         if (timing_differences[i] == first || timing_differences[i] == second || timing_differences[i] == third)
@@ -220,17 +384,19 @@ void form_binary_array(float timing_differences[], int char_binary_array[], floa
     }
 }
 
-void print_array(int arr[])
+// Helper function to print an array
+//
+void print_array(uint64_t arr[])
 {
     for (int i = 0; i < BINARYARRAY_BUFFERSIZE; i++)
     {
-        printf("%d", arr[i]);
+        printf("%llu\n", arr[i]);
     }
     printf("\n");
 
 }
 
-// Functoion to decode binary array into a character
+// Helper function to decode a binary array into it's relevant character using code39 format
 //
 char decode_array(int char_binary_array[])
 {
@@ -302,7 +468,7 @@ char decode_array(int char_binary_array[])
     return '?';
 }
 
-// Function to reverse the contents of an array
+// Helper function to reverse a given array
 //
 void reverse_array(int arr[])
 {
@@ -319,7 +485,7 @@ void reverse_array(int arr[])
     }
 }
 
-// Function to intialise the IR sensor
+// Function to initialize ADC functions, and all GPIO pins for adc functions
 //
 void IR_init()
 {

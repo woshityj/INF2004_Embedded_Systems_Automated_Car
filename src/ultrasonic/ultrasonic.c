@@ -3,35 +3,57 @@
 #include <stdbool.h>
 #include "hardware/gpio.h"
 #include "hardware/timer.h"
-// #include "ultrasonic.h"
 
-// #define SPEED_OF_SOUND 343 / 1000000 // meters per microsecond
-// #define DIFFERENCE(a, b) (a<b ? (b-a) : (a-b))
-#define TRIGGER_PIN 14
-#define ECHO_PIN 15
+#include "ultrasonic.h"
 
-
-int timeout = 26100;
-float centimeters = 0.0f;
-
-absolute_time_t startTime;
-absolute_time_t endTime;
-
-void initializeUltrasonic(uint triggerPin, uint echoPin);
-void echo_interrupt(uint gpio, uint32_t events);
-int64_t alarm_pulldown_callback(alarm_id_t id, void *user_data);
-
-// Auxillary function that could be used in the future
-
-/*float getCM(uint triggerPin, uint, echoPin)
+// Abstracted task returns
+// to be done
+int main(void)
 {
-    float pulseLength = getPulse(triggerPin, echoPin) / 58;
-    printf("measured:\t%.2f\n", pulseLength);
-    return pulseLength;
-}*/
+    stdio_init_all();
+
+    // sleep for time to turn on serial monitor
+    sleep_ms(3000);
+    printf("initializing the sensors\n");
+
+    initializeUltrasonic(TRIGGER_PIN, ECHO_PIN);
+
+    gpio_set_irq_enabled_with_callback(ECHO_PIN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &echo_interrupt);
+    
+    // Just for testing purposes to show the usage, will be abstracted away for tasks, this while loop simulates tasks that don't have a return
+    while(true)
+    {
+        gpio_put(TRIGGER_PIN, 1);
+        add_alarm_in_us(15, &alarm_pulldown_callback, NULL, false); // requires AT LEAST 10us for the sonic burst
+        sleep_us(15); // act like put into blocked state, will replace with vTaskDelay()
+        if(endTime > startTime)
+        {
+            int millimeters = getMM();
+            printf("The distance is: %dmm\n", millimeters);
+        }
+        // You can comment the sleep_ms(100) to limit test, but it won't be as accurate because the sound waves can't travel fast enough
+        sleep_ms(100);
+        // the sleep here is obviously just for testing, in the implementation it'll be replaced with vTask delays or function calls with delayUntil
+    }
+}
+
+int getMM()
+{
+    pulseLength = absolute_time_diff_us(startTime, endTime); // get the echo pin return wave form length
+    int milliimeters = pulseLength / 6;
+    if(milliimeters < 20 || milliimeters > 4000 || pulseLength >= TIMEOUT) // range of the HC-SR04P
+    {
+        milliimeters = 0; // if out of range then just assume that it was a 0
+    }
+    // reset the parameters for the next echo_interrupt
+    endTime = 0;
+    startTime = 0;
+    return milliimeters;
+}
 
 void initializeUltrasonic(uint triggerPin, uint echoPin)
 {
+    // pin initializings
     gpio_init(triggerPin);
     gpio_init(echoPin);
 
@@ -47,7 +69,6 @@ int64_t alarm_pulldown_callback(alarm_id_t id, void *user_data)
 
 void echo_interrupt(uint gpio, uint32_t events)
 {
-    //printf("echo interrupts\n");
     if(events & GPIO_IRQ_EDGE_RISE) // Ultrasonic sends the signal back
     {
         if(startTime == 0)
@@ -58,46 +79,9 @@ void echo_interrupt(uint gpio, uint32_t events)
 
     else if(events & GPIO_IRQ_EDGE_FALL) // Ultrasonic finishes sending signal
     {
-
-        endTime = get_absolute_time();
-        
-        absolute_time_t pulseLength = absolute_time_diff_us(startTime, endTime); // get the echo pin return wave form length
-        // printf("difference is %llu\n", pulseLength); debugging purposes
-        centimeters = pulseLength / 58; // convert to centimeters and assign it as a float value
-        
-        if(pulseLength >= timeout)
+        if(endTime == 0)
         {
-            printf("The distance is 0cm\n");
+            endTime = get_absolute_time();
         }
-        else
-        {
-            printf("The distance is: %.2fcm\n", centimeters);
-        }
-
-        // reset the parameters
-        startTime = 0;
-        endTime = 0;
-    }
-}
-
-int main(void)
-{
-    stdio_init_all();
-
-    // sleep for time to turn on serial monitor
-    sleep_ms(3000);
-    printf("initializing the sensors\n");
-
-    initializeUltrasonic(TRIGGER_PIN, ECHO_PIN);
-
-    gpio_set_irq_enabled_with_callback(ECHO_PIN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &echo_interrupt);
-    
-    // just for testing purposes to show the usage
-    while(true)
-    {
-        gpio_put(TRIGGER_PIN, 1);
-        add_alarm_in_us(15, &alarm_pulldown_callback, NULL, false); // requires at least 10us for the sonic burst
-        sleep_ms(1000);
-        // the sleep here is obviously just for testing, in the implementation it'll be replaced with vTask delays or function calls with delayUntil
     }
 }
