@@ -56,4 +56,6 @@ add_subdirectory(infrared)
 add_subdirectory(encoder)
 add_subdirectory(motor)
 add_subdirectory(ultrasonic)
+add_subdirectory(magnetometer)
 add_subdirectory(wifi)
+
