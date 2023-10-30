@@ -80,6 +80,10 @@ int get_wheel_rpm(uint gpio)
                 leftPulseTime = time_us_32() - leftNewTime;
             }
 
+            // According to the datasheet to get the RPM it is
+            // 60000000 / pulseTime, however as there are 20 holes in the 
+            // Wheel, it has become (60000000 / 20) / pulseTime
+            //
             int rpm = 30000000 / leftPulseTime;
 
             return rpm;
@@ -96,7 +100,11 @@ int get_wheel_rpm(uint gpio)
             {
                 rightPulseTime = time_us_32() - rightNewTime;
             }
-
+            
+            // According to the datasheet to get the RPM it is
+            // 60000000 / pulseTime, however as there are 20 holes in the 
+            // Wheel, it has become (60000000 / 20) / pulseTime
+            //
             int rpm = 30000000 / rightPulseTime;
 
             return rpm;

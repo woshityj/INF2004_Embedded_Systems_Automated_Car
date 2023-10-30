@@ -12,8 +12,8 @@
 #define GPIO_PIN_MOTOR_IN3 17
 #define GPIO_PIN_MOTOR_IN4 16
 
-#define MOTOR_LEFT 1
-#define MOTOR_RIGHT 2
+#define MOTOR_LEFT 2
+#define MOTOR_RIGHT 1
 
 #define PWM_CYCLE 12500
 
@@ -57,15 +57,15 @@ void motor_driver_init()
 */
 void move_forward()
 {
-    // Left Wheel Configuration
-    //
-    gpio_put(GPIO_PIN_MOTOR_IN1, 1);
-    gpio_put(GPIO_PIN_MOTOR_IN2, 0);
-
     // Right Wheel Configuration
     //
-    gpio_put(GPIO_PIN_MOTOR_IN3, 1);
-    gpio_put(GPIO_PIN_MOTOR_IN4, 0);
+    gpio_put(GPIO_PIN_MOTOR_IN1, 0);
+    gpio_put(GPIO_PIN_MOTOR_IN2, 1);
+
+    // Left Wheel Configuration
+    //
+    gpio_put(GPIO_PIN_MOTOR_IN3, 0);
+    gpio_put(GPIO_PIN_MOTOR_IN4, 1);
 }
 
 /*!
@@ -75,15 +75,15 @@ void move_forward()
 */
 void move_backward()
 {
-    // Left Wheel Configuration
-    //
-    gpio_put(GPIO_PIN_MOTOR_IN1, 0);
-    gpio_put(GPIO_PIN_MOTOR_IN2, 1);
-
     // Right Wheel Configuration
     //
-    gpio_put(GPIO_PIN_MOTOR_IN3, 0);
-    gpio_put(GPIO_PIN_MOTOR_IN4, 1);
+    gpio_put(GPIO_PIN_MOTOR_IN1, 1);
+    gpio_put(GPIO_PIN_MOTOR_IN2, 0);
+
+    // Left Wheel Configuration
+    //
+    gpio_put(GPIO_PIN_MOTOR_IN3, 1);
+    gpio_put(GPIO_PIN_MOTOR_IN4, 0);
 }
 
 /*!
@@ -93,12 +93,12 @@ void move_backward()
 */
 void turn_left()
 {
-    // Set Left Wheel to go Forward
+    // Set Right Wheel to go Backward
     //
     gpio_put(GPIO_PIN_MOTOR_IN1, 1);
     gpio_put(GPIO_PIN_MOTOR_IN2, 0);
 
-    // Set Right Wheel to go Backward
+    // Set Left Wheel to go Forward
     //
     gpio_put(GPIO_PIN_MOTOR_IN3, 0);
     gpio_put(GPIO_PIN_MOTOR_IN4, 1);
@@ -111,12 +111,12 @@ void turn_left()
 */
 void turn_right()
 {
-    // Set Left Wheel to go Backward
+    // Set Right Wheel to go Forward
     //
     gpio_put(GPIO_PIN_MOTOR_IN1, 0);
     gpio_put(GPIO_PIN_MOTOR_IN2, 1);
 
-    // Set Right Wheel to go Forward
+    // Set Left Wheel to go Backward
     //
     gpio_put(GPIO_PIN_MOTOR_IN3, 1);
     gpio_put(GPIO_PIN_MOTOR_IN4, 0);

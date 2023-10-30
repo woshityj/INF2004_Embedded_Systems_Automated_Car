@@ -55,8 +55,8 @@ Definitions in `motor.h`:
 
 // Preprocessor to easily call upon the Left or Right Motor
 //
-#define MOTOR_LEFT 1
-#define MOTOR_RIGHT 2
+#define MOTOR_LEFT 2
+#define MOTOR_RIGHT 1
 
 // Used in setting the duty cycle of the Left or Right Motor
 //

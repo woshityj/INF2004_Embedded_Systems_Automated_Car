@@ -13,7 +13,7 @@ int main()
     encoder_driver_init();
 
     move_forward();
-    set_speed(100, 1);
+    set_speed(50, MOTOR_RIGHT);
 
     while (true)
     {

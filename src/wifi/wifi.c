@@ -14,8 +14,8 @@
 #define POLL_TIME_S 20
 
 // WIFI Credentials - take care if pushing to github!
-const char WIFI_SSID[] = "ShoutPenisForPassword_1_2.4GHz";
-const char WIFI_PASSWORD[] = "Tyjtyc3009";
+const char WIFI_SSID[] = "yujie";
+const char WIFI_PASSWORD[] = "tyjtyc84";
 
 typedef struct TCP_SERVER_T_ {
     struct tcp_pcb *server_pcb;
