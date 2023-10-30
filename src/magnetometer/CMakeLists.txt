@@ -1,25 +1,14 @@
-cmake_minimum_required(VERSION 3.13)
-
-# include(pico_sdk_import.cmake)
-
-
-# project(lsm303dlh_project C CXX ASM)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX-STANDARD 17)
-pico_sdk_init()
-
-add_executable(magnetometer
-   magnetometer.c
-   lsm303dlh
-   lsm303dlh.c
+add_executable(magnetometer_driver
+   main.c
+   magnetometer_driver.c
 )
 
 # enable usb output, disable uart output
-pico_enable_stdio_usb(magnetometer 1)
-pico_enable_stdio_uart(magnetometer 0)
+pico_enable_stdio_usb(magnetometer_driver 1)
+pico_enable_stdio_uart(magnetometer_driver 0)
 
 # create map/bin/hex file etc.
-pico_add_extra_outputs(magnetometer)
+pico_add_extra_outputs(magnetometer_driver)
 
 # pull in common dependencies and additional i2c hardware support
-target_link_libraries(magnetometer pico_stdlib hardware_i2c)
+target_link_libraries(magnetometer_driver pico_stdlib hardware_i2c)

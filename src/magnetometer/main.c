@@ -5,7 +5,7 @@
 #include "pico/stdlib.h"
 #include "pico/binary_info.h"
 #include "hardware/i2c.h"
-#include "lsm303dlh.h"
+#include "magnetometer_driver.h"
 
 #define I2C_BAUD 400 // I2C baud rate (400 kHz)
 #define REFRESH_PERIOD 100 // Refresh period in milliseconds
@@ -25,19 +25,16 @@ int main() {
    stdio_init_all();
 
    // Setup device
-//    lsm303dlh_acc_setup();
-   lsm303dlh_mag_setup();
+   create_mag_setup();
 
-//    accel_t acc;
    mag_t mag;
 
    // Get initial angle
-   lsm303dlh_read_mag(&mag);
+   read_mag(&mag);
    int32_t start_angle = get_angle(&mag);
 
    while (true) {
-    //    lsm303dlh_read_acc(&acc);
-       lsm303dlh_read_mag(&mag);
+       read_mag(&mag);
        int32_t angle = get_angle(&mag);
        int32_t used_angle = angle - start_angle;
 
@@ -58,12 +55,10 @@ int main() {
            orientation = "West";
        }
 
-    // printf("Acc. X = %5d Y = %5d, Z = %5d",
-    //             acc.x,acc.y,acc.z);
        printf("Mag. X =%4d Y =%4d, Z =%4d, Orientation: %s\n",
               mag.x, mag.y, mag.z, orientation);
-       // printf("Relative Degree: %4d, True Degree: %4d, Orientation: %s\n",
-       //        used_angle, angle, orientation);
+    //    printf("Relative Degree: %4d, True Degree: %4d, Orientation: %s\n",
+    //           used_angle, angle, orientation);
        sleep_ms(REFRESH_PERIOD);
    }
    #endif
@@ -79,3 +74,4 @@ void init_i2c_default() {
    gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
    gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
 }
+/* end of main.c */
