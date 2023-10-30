@@ -43,7 +43,7 @@ Definitions in `ultrasonic.h`:
 // Function declarations
 
 // Helper function to initialize the ultrasonic sensor related pins
-void initializeUltrasonic(unsigned short triggerPin, unsigned short echoPin);
+void initializeUltrasonic(unsigned char triggerPin, unsigned char echoPin);
 
 // The Echo Pin callback function when it experiences and interrupt from the echo pin
 void echo_interrupt(uint gpio, uint32_t events);
