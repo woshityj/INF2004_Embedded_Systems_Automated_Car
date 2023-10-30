@@ -28,18 +28,11 @@ The Magnetometer Driver is designed to work with the GY-511 magnetometer sensor,
 - **Orientation Determination**: The main application reads magnetometer data, calculates the angle, normalizes it to 0-360 degrees, and determines the orientation (North, East, South, or West).
 - **Sleep Function**: A sleep function is used to introduce a delay between readings.
 - **Error Handling**: Error handling for I2C communication is not included in this code and should be added as needed.
-
-### Building and Running
-Ensure that you have the necessary libraries, including Pico SDK and hardware configurations, set up in your development environment. Follow the steps below to build and run the driver:
-
-1. Configure your hardware setup to match the I2C pins (`PICO_DEFAULT_I2C_SDA_PIN` and `PICO_DEFAULT_I2C_SCL_PIN`) and sensor connections.
-2. Include the required header files and link against the necessary libraries in your development environment.
-3. Compile and upload the code to your Raspberry Pi Pico.
-4. Monitor the serial output to view magnetometer data and orientation.
 ### Flowchart
 -- To be included --
 ### Header Files
 Definitions in `magnetometer_driver.h`:
+
 ```c
 #define INTERFACE_B 0x1E // Slave address for the magnetometer
 
