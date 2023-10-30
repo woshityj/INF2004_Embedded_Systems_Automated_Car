@@ -1,3 +1,13 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+#include "hardware/adc.h"
+#include "../mapping/mapper.h"
+
+#include "pico/stdlib.h"
+
 #define IR_PIN_FRONT 26 // ADC 0 
 #define IR_PIN_LEFT 27 // ADC 1
 #define IR_PIN_RIGHT 28 // ADC 2
@@ -29,7 +39,7 @@ typedef struct {
 } Code39Mapping;
 
 void IR_init();
-bool detect_wall();
+bool detect_line();
 Directions* get_directions(int currentlyFacing);
 bool IR_barcode_scan(struct repeating_timer *t);
 void calculate_timing_difference(uint64_t timings[], uint64_t timing_differences[]);

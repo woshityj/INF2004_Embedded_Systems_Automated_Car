@@ -1,14 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "hardware/adc.h"
 #include "infrared.h"
-#include "../mapping/mapper.h"
-
-#include "pico/stdlib.h"
-
 
 // Helper function to read from an adc input, and check whether the sensor is 
 // on a line or not
@@ -17,7 +7,7 @@ bool detect_line()
 {
     // Line detected
     //
-    if (adc_read() > 1500)
+    if (adc_read() > 1000)
     {
         return true;
     }
@@ -491,21 +481,5 @@ void IR_init()
 {
     adc_init();
     adc_gpio_init(IR_PIN_LEFT);
-}
-
-// Main function
-//
-int main()
-{
-    stdio_init_all();
-    IR_init();
-
     add_repeating_timer_ms(SAMPLE_RATE_MS, IR_barcode_scan, NULL, &timer);
-
-    while (1)
-    {
-
-    };
-
-    return 0;
 }
