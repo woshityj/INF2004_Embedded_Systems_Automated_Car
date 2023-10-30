@@ -49,7 +49,7 @@ Definitions in `infrared.h`:
 
 // Define the rate at which the CPU samples the ADC ( in ms )
 //
-#define SAMPLE_RATE_MS 10
+#define SAMPLE_RATE_MS -1
 
 // Define the array size to capture barcode absolute timings
 //
@@ -97,7 +97,7 @@ void IR_init();
 bool detect_wall();
 
 // Function to read the IR sensor based on the direction the motor vehicle is 
-//currently facing and populate the relevant directions ( North, South, East , West )
+// currently facing and populate the relevant directions ( North, South, East , West )
 //
 Directions* get_directions(int currentlyFacing);
 

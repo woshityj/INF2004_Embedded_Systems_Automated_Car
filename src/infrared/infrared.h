@@ -6,7 +6,8 @@
 #define ADC_LEFT 1
 #define ADC_RIGHT 2
 
-#define SAMPLE_RATE_MS 10
+#define SAMPLE_RATE_MS -1
+#define NUMBER_OF_SAMPLES 10
 #define TIMING_BUFFERSIZE 10
 #define TIMINGDIFFERENCES_BUFFERSIZE 9
 #define BINARYARRAY_BUFFERSIZE 9
@@ -31,9 +32,9 @@ void IR_init();
 bool detect_wall();
 Directions* get_directions(int currentlyFacing);
 bool IR_barcode_scan(struct repeating_timer *t);
-void calculate_timing_difference(float timings[], float timing_differences[]);
-void find_top_three_timings(float arr[], float *first, float *second, float *third);
-void form_binary_array(float timing_differences[], int char_binary_array[], float first, float second, float third);
-void print_array(int arr[]);
+void calculate_timing_difference(uint64_t timings[], uint64_t timing_differences[]);
+void find_top_three_timings(uint64_t arr[], uint64_t *first, uint64_t *second, uint64_t *third);
+void form_binary_array(uint64_t timing_differences[], int char_binary_array[], uint64_t first, uint64_t second, uint64_t third);
+void print_array(uint64_t arr[]);
 char decode_array(int char_binary_array[]);
 void reverse_array(int arr[]);
