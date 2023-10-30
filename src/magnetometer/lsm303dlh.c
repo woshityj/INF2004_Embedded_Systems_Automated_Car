@@ -125,6 +125,7 @@ void lsm303dlh_read_mag(mag_t *mag) {
       magnet[i] = ((buffer[i * 2] << 8 | buffer[(i * 2) + 1] ));
    }
 
+   // Save x,y,z values into magnet array
    mag->x = magnet[0];
    mag->y = magnet[1];
    mag->z = magnet[2];
@@ -138,7 +139,7 @@ int32_t get_angle(mag_t *mag) {
    // Convert angle to degrees
    int32_t angle_deg = (int32_t)(angle_rad * (180.0 / M_PI));
 
-   // Normalize the angle to 0-360
+   // Normalise the angle to 0-360
    if (angle_deg < 0) {
        angle_deg += 360;
    }

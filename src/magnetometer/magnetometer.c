@@ -43,7 +43,7 @@ while (true) {
    int32_t angle = get_angle(&mag);
    int32_t used_angle = angle - start_angle;
 
-   // Normalize the angle to 0-360
+   // Normalise the angle to 0-360
    if (used_angle < 0) {
        used_angle += 360;
    }
@@ -60,10 +60,10 @@ while (true) {
         orientation = "West";
     }
 
-   //  printf("Mag. X =%4d Y =%4d, Z =%4d, Orientation: %s\n",
-   //         mag.x, mag.y, mag.z, orientation);
-    printf("Relative Degree: %4d, True Degree: %4d, Orientation: %s\n",
-           used_angle,angle, orientation);
+    printf("Mag. X =%4d Y =%4d, Z =%4d, Orientation: %s\n",
+           mag.x, mag.y, mag.z, orientation);
+    // printf("Relative Degree: %4d, True Degree: %4d, Orientation: %s\n",
+    //        used_angle,angle, orientation);
     sleep_ms(REFRESH_PERIOD);
 }
 
@@ -80,5 +80,3 @@ void init_i2c_default() {
    gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
    gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
 }
-
-/* end of main.c */
