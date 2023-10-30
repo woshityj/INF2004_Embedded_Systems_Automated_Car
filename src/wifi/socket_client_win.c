@@ -14,7 +14,7 @@
 
 // ---------------
 // Linking with Ws2_32.lib for socket programming
-//
+// Use the -lws2_32 flag when compiling using GCC 
 #pragma comment(lib, "ws2_32.lib")
 
 int main()
@@ -45,7 +45,7 @@ int main()
     //
     SOCKADDR_IN clientService;
     clientService.sin_family = AF_INET;
-    clientService.sin_addr.s_addr = inet_addr("192.168.79.12");
+    clientService.sin_addr.s_addr = inet_addr("192.168.31.232");
     clientService.sin_port = htons(PORT);
 
     // ----------------------
