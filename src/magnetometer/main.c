@@ -12,6 +12,7 @@
 
 // Function declaration
 void init_i2c_default();
+void get_readings();
 
 // main ------------------------------------------------------------------
 int main() {
@@ -26,14 +27,27 @@ int main() {
 
    // Setup device
    create_mag_setup();
+   get_readings();
+   #endif
+   return 0;
+}
 
-   mag_t mag;
+// function --------------------------------------------------------------
+void init_i2c_default() {
+   // Initialize I2C with the default settings
+   i2c_init(i2c_default, I2C_BAUD * 1000);
+   gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
+   gpio_set_function(PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C);
+   gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
+   gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
+}
 
-   // Get initial angle
+void get_readings() {
+    mag_t mag;
+    // Get initial angle
    read_mag(&mag);
    int32_t start_angle = get_angle(&mag);
-
-   while (true) {
+    while (true) {
        read_mag(&mag);
        int32_t angle = get_angle(&mag);
        int32_t used_angle = angle - start_angle;
@@ -61,17 +75,5 @@ int main() {
     //           used_angle, angle, orientation);
        sleep_ms(REFRESH_PERIOD);
    }
-   #endif
-   return 0;
-}
-
-// function --------------------------------------------------------------
-void init_i2c_default() {
-   // Initialize I2C with the default settings
-   i2c_init(i2c_default, I2C_BAUD * 1000);
-   gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
-   gpio_set_function(PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C);
-   gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
-   gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
 }
 /* end of main.c */
