@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
-#include "hardware/gpio.h"
-#include "hardware/adc.h"
+#include "../infrared/infrared.h"
 
 #include "mapper.h"
 #include "set.h"
@@ -15,111 +13,322 @@ Cell *currentCell;
 Cell *previousCell;
 Coordinates currentVector;
 
-int currentlyFacing = NORTH; // always assumes it starts off facing "north" which is calibrated to the magnetometer of relative 'north'
-bool isMapping = 1;
+volatile int currentlyFacing = NORTH; // always assumes it starts off facing "north" which is calibrated to the magnetometer of relative 'north'
 
-int main(void) //rename to mazeInit() as a task
+// The only 2 functions that the movement logic needs to call everytime it does something
+void movedForward(int currentlyFacing)
+{
+    switch(currentlyFacing)
+    {
+        case NORTH:
+            movedNorth(currentlyFacing);
+        case SOUTH:
+            movedSouth(currentlyFacing);
+        case EAST:
+            movedEast(currentlyFacing);
+        case WEST:
+            movedWest(currentlyFacing);
+    }
+}
+
+void movedBackwards(int forwardFacing)
+{
+    switch(currentlyFacing)
+    {
+        case NORTH:
+            movedSouth(forwardFacing);
+            // Set the currentlyFacing back to where it was actually at since it's moving backwards
+            currentlyFacing = NORTH;
+        case SOUTH:
+            movedNorth(forwardFacing);
+            currentlyFacing = SOUTH;
+        case EAST:
+            movedWest(forwardFacing);
+            currentlyFacing = EAST;
+        case WEST:
+            movedEast(forwardFacing);
+            currentlyFacing = WEST;
+    }
+}
+
+// API ends
+
+
+Cell *initMaze()
 {
     allVectorSets = init();
     startOfMaze.genesisCell = generateGenesis(); // returns the address of the starting cell
     currentVector.x = 0;
     currentVector.y = 0;
 
-    // generate the genesis cell
+    // Puts x,y = 0 into the set to mark as a visited cell
+    insert(allVectorSets, currentVector);
+    // Generate the genesis cell
     previousCell = NULL;
     currentCell = startOfMaze.genesisCell;
 
-    //loop unroll for the genesis cell
-    currentCell->northWall = getWall("north", currentlyFacing);
-    if(currentCell->northWall) // theres an north wall
+    // Api to the infrared sensors
+    Directions *neighbors = get_directions(currentlyFacing);
+
+    // Find out whether or not there are walls at these 4 directions
+    currentCell->northWall = neighbors->north;
+    currentCell->southWall = neighbors->south;
+    currentCell->eastWall = neighbors->east;
+    currentCell->westWall = negihbors->west;
+
+    // For each of the directions, if there is a wall, just reclaim the memory there
+    if(currentCell->northWall)
     {
-        free(currentCell->north); // reclaim memory
+        free(currentCell->north);
     }
-    currentCell->eastWall = getWall("east", currentlyFacing);
     if(currentCell->eastWall) // theres an east wall
     {
         free(currentCell->east);
     }
-
-    currentCell->westWall = getWall("west", currentlyFacing);
     if(currentCell->westWall) // theres an west wall
     {
         free(currentCell->west); // reclaim memory
     }
-
     previousCell = currentCell;
 
-    //move this outside this mazeInit() and becomes a interrupt callback
-
-    // for every cell moment made (decided by wheel encoder and others if possible)
-    // add a new Cell and update currentCell to be that Cell
-
-    gpio_set_irq_enabled_with_callback(MOVEMENT_PULSE,/* message buffer message type telling what direction it moved */, true, &movementCallBack);
+    return currentCell; // returns the cell's address to the main callee
 }
 
-//movementCallbackFunction interrupts the task and changes previousCell before making a new currentCell
-
-void movementCallBack(uint gpio, uint32_t events)
+void movedNorth(int currentlyFacing)
 {
-    if(movedNorth)
+    currentCell = previousCell.northNeighbor;
+    currentlyFacing = NORTH;
+    currentVector.x = previousCell->vector.x;
+    currentVector.y = previousCell->vector.y + 1;
+
+    if(!is_member(allVectorSets, currentVector)) // iff the currentVector position is not in the set
     {
-        currentCell = previousCell.north;
-        currentlyFacing = NORTH;
-        currentVector.x = previousCell->vector.x;
-        currentVector.y = previousCell->vector.y + 1;
+        insert(allVectorSets, currentVector);
 
-        if(!is_member(allVectorSets, currentVector)) // iff the currentVector position is not in the set
+        currentCell.origin = false;
+        currentCell.ending = false;
+        // Give this cell the coordinates associated with it
+        currentCell->vector.x = currentVector.x;
+        currentCell->vector.y = currentVector.y;
+
+        // The neighbors are all assumed to be moveable until proven otherwise
+        generateNeighborCellsForNorth(currentCell);
+
+        // Query about its neighboring cells wall status
+        Directions *neighbors = get_directions(currentlyFacing);
+
+        currentCell->northWall = neighbors->north;
+        currentCell->southWall = neighbors->south;
+        currentCell->eastWall = neighbors->east;
+        currentCell->westWall = negihbors->west;
+
+        // IFF all these conditions return true, then it is considered the end of the maze
+        if(!(currentCell->northWall & currentCell->eastWall & currentCell->westWall))
         {
-            insert(allVectorSets, currentVector);
-            currentCell = previousCell.north;
-            currentCell = generateCellsForNorth(currentCell); // generate a 3 new cells and put the previous cell's address into south and add the vectors
-
-            currentCell->southWall = false; // logically this means that there is no wall in the south cell
-
-            currentCell->eastWall = getWall("east", currentlyFacing);
-            if(currentCell->eastWall) // theres an east wall
-            {
-                free(currentCell->east);
-            }
-
-            currentCell->westWall = getWall("west", currentlyFacing);
-            if(currentCell->westWall) // theres an west wall
-            {
-                free(currentCell->west); // reclaim memory
-            }
-
-            currentCell->northWall = getWall("north", currentlyFacing);
-            if(currentCell->northWall) // theres an north wall
-            {
-                free(currentCell->north); // reclaim memory
-            }
-
+            currentCell.ending = true;
+            currentCell->northWall = true;
+            currentCell->easthWall = true;
+            currentCell->westWall = true;
+            free(currentCell->northNeighbor);
+            free(currentCell->eastNeighbor);
+            free(currentCell->westNeighbor);
+            endOfMaze.genesisCell = currentCell;
         }
 
-        previousCell = currentCell; // update the previous cell
-
+        // For each of the directions, if there is a wall, just reclaim the memory there
+        if(currentCell->eastWall)
+        {
+            free(currentCell->eastNeighbor);
+        }
+        if(currentCell->westWall)
+        {
+            free(currentCell->westNeighbor);
+        }
+        if(currentCell->northWall)
+        {
+            free(currentCell->northNeighbor);
+        }
     }
-
-    else if(movedSouth)
-    {
-
-    }
-
-
-    else if(movedEast)
-    {
-
-    }
-
-
-    else if(movedWest)
-
-    if(is_End()) // reached end doesn't mean mapped whole maze
-    {
-        currentCell.ending = true;
-        endOfMaze.genesisCell = currentCell;
-    }
+    previousCell = currentCell; // update the previous cell
 }
+
+void movedSouth(int currentlyFacing)
+{
+    currentCell = previousCell.southNeighbor;
+    currentlyFacing = SOUTH;
+    currentVector.x = previousCell->vector.x;
+    currentVector.y = previousCell->vector.y - 1;
+
+    if(!is_member(allVectorSets, currentVector)) // iff the currentVector position is not in the set
+    {
+        insert(allVectorSets, currentVector);
+
+        currentCell.origin = false;
+        currentCell.ending = false;
+        // Give this cell the coordinates associated with it
+        currentCell->vector.x = currentVector.x;
+        currentCell->vector.y = currentVector.y;
+
+        // The neighbors are all assumed to be moveable until proven otherwise
+        generateNeighborCellsForSouth(currentCell);
+
+        // Query about its neighboring cells wall status
+        Directions *neighbors = get_directions(currentlyFacing);
+
+        currentCell->northWall = neighbors->north;
+        currentCell->southWall = neighbors->south;
+        currentCell->eastWall = neighbors->east;
+        currentCell->westWall = negihbors->west;
+
+        // IFF all these conditions return false, then it is considered the end of the maze
+        if(!(currentCell->southWall & currentCell->eastWall & currentCell->westWall))
+        {
+            currentCell.ending = true;
+            currentCell->southWall = true;
+            currentCell->eastWall = true;
+            currentCell->westWall = true;
+            free(currentCell->southNeighbor);
+            free(currentCell->eastNeighbor);
+            free(currentCell->westNeighbor);
+            endOfMaze.genesisCell = currentCell;
+        }
+
+        // For each of the directions, if there is a wall, just reclaim the memory there
+        if(currentCell->southWall)
+        {
+            free(currentCell->southNeighbor);
+        }
+        if(currentCell->eastWall)
+        {
+            free(currentCell->eastNeighbor);
+        }
+        if(currentCell->westWall)
+        {
+            free(currentCell->westNeighbor);
+        }
+    }
+
+    previousCell = currentCell; // update the previous cell
+}
+
+void movedEast(int currentlyFacing)
+{
+    currentCell = previousCell.eastNeighbor;
+    currentlyFacing = EAST;
+    currentVector.x = previousCell->vector.x + 1;
+    currentVector.y = previousCell->vector.y;
+
+    if(!is_member(allVectorSets, currentVector)) // iff the currentVector position is not in the set
+    {
+        insert(allVectorSets, currentVector);
+
+        currentCell.origin = false;
+        currentCell.ending = false;
+        // Give this cell the coordinates associated with it
+        currentCell->vector.x = currentVector.x;
+        currentCell->vector.y = currentVector.y;
+
+        // The neighbors are all assumed to be moveable until proven otherwise
+        generateNeighborCellsForEast(currentCell);
+
+        // Query about its neighboring cells wall status
+        Directions *neighbors = get_directions(currentlyFacing);
+
+        currentCell->northWall = neighbors->north;
+        currentCell->southWall = neighbors->south;
+        currentCell->eastWall = neighbors->east;
+        currentCell->westWall = negihbors->west;
+
+        // IFF all these conditions return false, then it is considered the end of the maze
+        if(!(currentCell->northWall & currentCell->southWall & currentCell->eastWall))
+        {
+            currentCell.ending = true;
+            currentCell->northWall = true;
+            currentCell->southWall = true;
+            currentCell->eastWall = true;
+            free(currentCell->northNeighbor);
+            free(currentCell->southNeighbor);
+            free(currentCell->eastNeighbor);
+            endOfMaze.genesisCell = currentCell;
+        }
+
+        // For each of the directions, if there is a wall, just reclaim the memory there
+        if(currentCell->northWall)
+        {
+            free(currentCell->northNeighbor);
+        }
+        if(currentCell->southWall)
+        {
+            free(currentCell->southNeighbor);
+        }
+        if(currentCell->eastWall)
+        {
+            free(currentCell->eastNeighbor);
+        }
+    }
+
+    previousCell = currentCell; // update the previous cell
+}
+
+void movedWest(int currentlyFacing)
+{
+    currentCell = previousCell.westNeighbor;
+    currentlyFacing = WEST;
+    currentVector.x = previousCell->vector.x - 1;
+    currentVector.y = previousCell->vector.y;
+
+    if(!is_member(allVectorSets, currentVector)) // iff the currentVector position is not in the set
+    {
+        insert(allVectorSets, currentVector);
+
+        currentCell.origin = false;
+        currentCell.ending = false;
+        // Give this cell the coordinates associated with it
+        currentCell->vector.x = currentVector.x;
+        currentCell->vector.y = currentVector.y;
+
+        // The neighbors are all assumed to be moveable until proven otherwise
+        generateNeighborCellsForWest(currentCell);
+
+        // Query about its neighboring cells wall status
+        Directions *neighbors = get_directions(currentlyFacing);
+
+        currentCell->northWall = neighbors->north;
+        currentCell->southWall = neighbors->south;
+        currentCell->eastWall = neighbors->east;
+        currentCell->westWall = negihbors->west;
+
+        // IFF all these conditions return false, then it is considered the end of the maze
+        if(!(currentCell->northWall & currentCell->southWall & currentCell->westWall))
+        {
+            currentCell.ending = true;
+            currentCell->northWall = true;
+            currentCell->southWall = true;
+            currentCell->westWall = true;
+            free(currentCell->northNeighbor);
+            free(currentCell->southNeighbor);
+            free(currentCell->westNeighbor);
+            endOfMaze.genesisCell = currentCell;
+        }
+
+        // For each of the directions, if there is a wall, just reclaim the memory there
+        if(currentCell->northWall)
+        {
+            free(currentCell->northNeighbor);
+        }
+        if(currentCell->southWall)
+        {
+            free(currentCell->southNeighbor);
+        }
+        if(currentCell->westWall)
+        {
+            free(currentCell->westNeighbor);
+        }
+    }
+
+    previousCell = currentCell; // update the previous cell
+}
+
 Cell* generateGenesis()
 {
 
@@ -134,7 +343,7 @@ Cell* generateGenesis()
     genesisCell->origin = true;
     genesisCell->ending = false;
 
-    genesisCell->southWall = true; // assumes to have a wall behind
+    genesisCell->southWall = false; // Assumes false so the map can have a hole in it to signify it's the start
     
     // assumes every other direction is clear for now
     genesisCell->northWall = false;
@@ -145,56 +354,79 @@ Cell* generateGenesis()
     genesisCell->vector.x = 0; // puts the value 0 into x
     genesisCell->vector.y = 0; // puts the value 0 into y
 
-    // assumes it all directions neighbors
-    genesisCell->north = malloc(sizeof(Cell));
-    genesisCell->south = NULL; // genesis always has a NULL south
-    genesisCell->east = malloc(sizeof(Cell));;
-    genesisCell->west = malloc(sizeof(Cell));
+    Cell *newNorthNeighbor = malloc(sizeof(Cell));
+    Cell *newEastNeighbor = malloc(sizeof(Cell));
+    Cell *newWestNeighbor = malloc(sizeof(Cell));
+
+    if(newNorthNeighbor == NULL || newEastNeighbor == NULL || newWestNeighbor == NULL)
+    {
+        exit(1);
+    }
+    // Assumes it all directions neighbors
+    genesisCell->northNeighbor = newNorthNeighbor;
+    genesisCell->southNeighbor = NULL; // genesis always has a NULL south
+    genesisCell->eastNeighbor = newEastNeighbor;
+    genesisCell->westNeighbor = newWestNeighbor;
 
     return genesisCell;
 }
 
-Cell* generateCellsForNorth(Cell *currentCell) // just generates and initializes all the information required
-{
-    currentCell->south = previousCell;
-
-    Cell *newCell = malloc(sizeof(Cell));
-
-    if(newCell == NULL)
+void generateNeighborCellsForNorth(Cell *currentCell) // just generates and initializes all the information required
+{   
+    currentCell->southNeighbor = previousCell;
+    Cell *newNorthNeighbor = malloc(sizeof(Cell));
+    Cell *newEastNeighbor = malloc(sizeof(Cell));
+    Cell *newWestNeighbor = malloc(sizeof(Cell));
+    if(newNorthNeighbor == NULL || newEastNeighbor == NULL || newWestNeighbor == NULL)
     {
         exit(1);
     }
-
-    newCell->origin = false;
-    newCell->ending = false;
-
-    newCell->southWall = false; // will always be true
-
-    newCell->northWall = false;
-    newCell->eastWall = false;
-    newCell->westWall = false;
-
-    newCell.vector.x = currentVector.x;
-    newCell.vector.y = currentVector.y;
-
-    newCell->north = malloc(sizeof(Cell));
-    newCell->south = currentCell;
-    newCell->east = malloc(sizeof(Cell));
-    newCell->west = malloc(sizeof(Cell));
-
-    return newCell;
+    currentCell->northNeighbor = newNorthNeighbor;
+    currentCell->eastNeighbor = newEastNeighbor;
+    currentCell->westNeighbor = newWestNeighbor;
 }
 
-bool isNull(Cell *cellToCheck)
+void generateNeighborCellsForSouth(Cell *currentCell)
 {
-    if(cellToCheck == NULL)
+    currentCell->northNeighbor = previousCell;
+    Cell *newSouthNeighbor = malloc(sizeof(Cell));
+    Cell *newEastNeighbor = malloc(sizeof(Cell));
+    Cell *newWestNeighbor = malloc(sizeof(Cell));
+    if(newSouthNeighbor == NULL || newEastNeighbor == NULL || newWestNeighbor == NULL)
     {
-        return true;
+        exit(1);
     }
+    currentCell->southNeighbor = newSouthNeighbor;
+    currentCell->eastNeighbor = newEastNeighbor;
+    currentCell->westNeighbor = newWestNeighbor;
 }
-bool isEnd()
+
+void generateNeighborCellsForEast(Cell *currentCell)
 {
-    // bunch of sensor checks
-    // return true if confident it's the end
-    // else return false
+    currentCell->westNeighbor = previousCell;
+    Cell *newNorthNeighbor = malloc(sizeof(Cell));
+    Cell *newSouthNeighbor = malloc(sizeof(Cell));
+    Cell *newEastNeighbor = malloc(sizeof(Cell));
+    if(newSouthNeighbor == NULL || newEastNeighbor == NULL || newNorthNeighbor == NULL)
+    {
+        exit(1);
+    }
+    currentCell->northNeighbor = newNorthNeighbor;
+    currentCell->southNeighbor = newSouthNeighbor;
+    currentCell->eastNeighbor = newEastNeighbor;
+}
+
+void generateNeighborCellsForWest(Cell *currentCell)
+{
+    currentCell->eastNeighbor = previousCell;
+    Cell *newNorthNeighbor = malloc(sizeof(Cell));
+    Cell *newSouthNeighbor = malloc(sizeof(Cell));
+    Cell *newWestNeighbor = malloc(sizeof(Cell));
+    if(newSouthNeighbor == NULL || newWestNeighbor == NULL || newNorthNeighbor == NULL)
+    {
+        exit(1);
+    }
+    currentCell->northNeighbor = newNorthNeighbor;
+    currentCell->southNeighbor = newSouthNeighbor;
+    currentCell->westNeighbor = newWestNeighbor;
 }

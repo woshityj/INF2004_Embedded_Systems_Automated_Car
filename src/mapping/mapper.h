@@ -23,10 +23,10 @@ typedef struct Cell{
     bool westWall;
 
     // basic struct, for diagonals, must store 4 more for diagonal neighbors
-    struct Cell *north;
-    struct Cell *south;
-    struct Cell *east;
-    struct Cell *west;
+    struct Cell *northNeighbor;
+    struct Cell *southNeighbor;
+    struct Cell *eastNeighbor;
+    struct Cell *westNeighbor;
 
     Coordinates vector;
 
@@ -37,5 +37,16 @@ typedef struct Head{
 } Head;
 
 Cell* generateGenesis();
+void movedForward(int currentlyFacing);
+void movedBackwards(int forwardFacing);
+Cell *initMaze();
+void movedNorth(int currentlyFacing);
+void movedSouth(int currentlyFacing);
+void movedEast(int currentlyFacing);
+void movedWest(int currentlyFacing);
+void generateNeighborCellsForNorth(Cell *currentCell);
+void generateNeighborCellsForSouth(Cell *currentCell);
+void generateNeighborCellsForEast(Cell *currentCell);
+void generateNeighborCellsForWest(Cell *currentCell);
 
 #endif
