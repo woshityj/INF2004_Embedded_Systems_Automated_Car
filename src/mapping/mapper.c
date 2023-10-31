@@ -31,6 +31,7 @@ void movedForward(int currentlyFacing)
     }
 }
 
+// Only works if the maze is already mapped, otherwise will break
 void movedBackwards(int forwardFacing)
 {
     switch(currentlyFacing)

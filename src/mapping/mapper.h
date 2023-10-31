@@ -6,11 +6,6 @@
 #define EAST 0x3
 #define WEST 0x4
 
-#define EVENT_NORTH 0x1
-#define EVENT_SOUTH 0x2
-#define EVENT_EAST 0x3
-#define EVENT_WEST 0x4
-
 #include "set.h"
 
 typedef struct Cell{
