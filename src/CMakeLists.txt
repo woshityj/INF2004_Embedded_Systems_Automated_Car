@@ -59,3 +59,4 @@ add_subdirectory(ultrasonic)
 add_subdirectory(magnetometer)
 add_subdirectory(wifi)
 
+add_subdirectory(webserver_and_wifi)

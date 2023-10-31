@@ -10,29 +10,6 @@
 const char WIFI_SSID[] = "ShoutPenisForPassword_1_2.4GHz";
 const char WIFI_PASSWORD[] = "Tyjtyc3009";
 
-void wifi_init()
-{
-    if (cyw43_arch_init())
-    {
-        printf("[WiFi] Failed to initialize\n");
-        return;
-    }
-
-    cyw43_arch_enable_sta_mode();
-    printf("[WiFi] Connecting to WiFi...\n");
-    if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000) != 0)
-    {
-        printf("[WiFi] Failed to connect.\n");
-        exit(1);
-    }
-    else
-    {
-        printf("[WiFi] Connected.\n");
-    }
-
-    
-}
-
 int main() {
     stdio_init_all();
 
