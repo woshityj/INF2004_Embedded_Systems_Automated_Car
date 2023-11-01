@@ -4,6 +4,7 @@
 typedef struct Coordinates{
     int x;      // vector x-axis
     int y;      // vector y-axis
+    Cell *cellAddress;
 } Coordinates;
 
 typedef struct Set{

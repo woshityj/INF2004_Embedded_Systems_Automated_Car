@@ -111,6 +111,7 @@ void movedNorth(int currentlyFacing)
         // Give this cell the coordinates associated with it
         currentCell->vector.x = currentVector.x;
         currentCell->vector.y = currentVector.y;
+        currentCell->vector.cellAddress = currentCell;
 
         // The neighbors are all assumed to be moveable until proven otherwise
         generateNeighborCellsForNorth(currentCell);
@@ -169,6 +170,7 @@ void movedSouth(int currentlyFacing)
         // Give this cell the coordinates associated with it
         currentCell->vector.x = currentVector.x;
         currentCell->vector.y = currentVector.y;
+        currentCell->vector.cellAddress = currentCell;
 
         // The neighbors are all assumed to be moveable until proven otherwise
         generateNeighborCellsForSouth(currentCell);
@@ -228,6 +230,7 @@ void movedEast(int currentlyFacing)
         // Give this cell the coordinates associated with it
         currentCell->vector.x = currentVector.x;
         currentCell->vector.y = currentVector.y;
+        currentCell->vector.cellAddress = currentCell;
 
         // The neighbors are all assumed to be moveable until proven otherwise
         generateNeighborCellsForEast(currentCell);
@@ -287,6 +290,7 @@ void movedWest(int currentlyFacing)
         // Give this cell the coordinates associated with it
         currentCell->vector.x = currentVector.x;
         currentCell->vector.y = currentVector.y;
+        currentCell->vector.cellAddress = currentCell;
 
         // The neighbors are all assumed to be moveable until proven otherwise
         generateNeighborCellsForWest(currentCell);
@@ -354,6 +358,7 @@ Cell* generateGenesis()
     // starts at origin
     genesisCell->vector.x = 0; // puts the value 0 into x
     genesisCell->vector.y = 0; // puts the value 0 into y
+    currentCell->vector.cellAddress = genesisCell;
 
     Cell *newNorthNeighbor = malloc(sizeof(Cell));
     Cell *newEastNeighbor = malloc(sizeof(Cell));
@@ -430,4 +435,12 @@ void generateNeighborCellsForWest(Cell *currentCell)
     currentCell->northNeighbor = newNorthNeighbor;
     currentCell->southNeighbor = newSouthNeighbor;
     currentCell->westNeighbor = newWestNeighbor;
+}
+
+Cell* getMap(Set *set)
+{
+    // get the extreme ends of -y, -x, y, x
+    // form rows and columns based off the absolute diff btwn -y to y for rows and -x to x for columns
+    // malloc(sizeof(Cell*rows*cols))
+    // walk through the entire set and pluck their addresses one by one
 }
