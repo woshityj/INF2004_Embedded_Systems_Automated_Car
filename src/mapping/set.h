@@ -1,6 +1,9 @@
 #ifndef sets
 #define sets
 
+#include "mapper.h"
+#define DIFFERENCE(a, b) (a<b ? (b-a) : (a-b))
+
 typedef struct Coordinates{
     int x;      // vector x-axis
     int y;      // vector y-axis
@@ -17,5 +20,6 @@ bool is_empty(Set *set);
 bool is_member(Set *set, Coordinates inputVector);
 void insert(Set *set, Coordinates inputVector);
 void print_set(Set *set);
+Coordinates* getColsAndRows(Set *set);
 
 #endif

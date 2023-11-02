@@ -437,8 +437,38 @@ void generateNeighborCellsForWest(Cell *currentCell)
     currentCell->westNeighbor = newWestNeighbor;
 }
 
-Cell* getMap(Set *set)
+Cell** getMap(Set *set)
 {
+    Coordinates *arrayOfCords = getColsAndRows(set);
+
+    Coordinates dimensions = arrayOfCords[0];
+    Coordinates lowestValues = arrayOfCords[1];
+
+    short rows = dimensions.y;
+    short cols = dimensions.x;
+    short lowestX = lowestValues.x;
+    short lowestY = lowestValues.y;
+
+    Cell **mapGrid = (Cell **)calloc(rows * sizeof(Cell *));
+
+    for(short i = 0; i < rows; i++)
+    {
+        mapGrid[i] = (Cell *)calloc(cols * sizeof(Cell)); 
+    }
+
+    short setSize = set->length;
+    
+    for(short i = 0; i < setSize; i++)
+    {
+        Cell *currentCell = set->members[i].cellAddress;
+        short normalizedColumnPosition = set->members[i].x + lowestX;
+        short normalizedRowPosition = set->members[i].y + lowestY;
+        mapGrid[normalizedRowPosition][normalizedColumnPosition] = currentCell;
+    }
+
+    free(arrayOfCords);
+    
+    return mapGrid;
     // get the extreme ends of -y, -x, y, x
     // form rows and columns based off the absolute diff btwn -y to y for rows and -x to x for columns
     // malloc(sizeof(Cell*rows*cols))

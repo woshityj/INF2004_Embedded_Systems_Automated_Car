@@ -72,6 +72,58 @@ void print_set(Set *set)
   }
 }
 
+Coordinates* getColsAndRows(Set *set)
+{
+    unsigned short size = set->length;
+
+    Coordinates *colsAndRowsVector = (Coordinates *)(2 * sizeof(Coordinates));
+    
+    if(colsAndRowsVector == NULL)
+    {
+        exit(1);
+    }
+
+    short lowestX = 0;
+    short lowestY = 0;
+    short highestX = 0;
+    short highestY = 0;
+
+    for(int i = 0; i < size; i++)
+    {   
+        Coordinates currentVector = set->members[i];
+        short currentX = currentVector.x;
+        short currentY = currentVector.y;
+        // Check the lowest vectors and update
+        if(lowestX > currentX)
+        {
+            lowestX = currentX;
+        }
+        if(lowestY > currentY)
+        {
+            lowestY = currentY;
+        }
+        if(highestX < currentX)
+        {
+            highestX = currentX;
+        }
+        if(highestY < currentY)
+        {
+            highestY = currentY;
+        }
+    }
+
+    short rows = DIFFERENCE(lowestY, highestY);
+    short columns = DIFFERENCE(lowestX, highestX);
+
+    colsAndRowsVector[0].y = rows;
+    colsAndRowsVector[0].x = columns;
+    
+    colsAndRowsVector[1].y = lowestY;
+    colsAndRowsVector[1].x = lowestX;
+
+    return colsAndRowsVector;
+
+}
 /* How to use */
 //int main()
 //{
