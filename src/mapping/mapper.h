@@ -43,5 +43,6 @@ void generateNeighborCellsForNorth(Cell *currentCell);
 void generateNeighborCellsForSouth(Cell *currentCell);
 void generateNeighborCellsForEast(Cell *currentCell);
 void generateNeighborCellsForWest(Cell *currentCell);
+Cell** getMap(Set *set);
 
 #endif
