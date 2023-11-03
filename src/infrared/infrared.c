@@ -3,11 +3,32 @@
 // Helper function to read from an adc input, and check whether the sensor is 
 // on a line or not
 // 
-bool detect_line()
+bool detect_line(int adc_input)
 {
+    // Variables to calculate the simple average of the IR sensor
+    //
+    int simpleAvg_index = 0;
+    int simpleAvg_sum = 0;
+    int simpleAvg_result = 0;
+
+    // Calculate simple average
+    //
+    while (simpleAvg_index < NUMBER_OF_SAMPLES)
+    {
+        adc_select_input(adc_input);
+        simpleAvg_sum += adc_read();
+        simpleAvg_index++;
+        
+        // Using sleep for now, can change to task delay later on
+        //
+        sleep_ms(100);
+    }
+    
+    simpleAvg_result = simpleAvg_sum/NUMBER_OF_SAMPLES;
+
     // Line detected
     //
-    if (adc_read() > 1000)
+    if (simpleAvg_result > 1000)
     {
         return true;
     }
@@ -18,6 +39,14 @@ bool detect_line()
         return false;
     }
     
+}
+
+bool move45_detect_line(int adc_input)
+{
+    // Currently a stub function, implement movement here
+    //
+
+    return detect_line(adc_input);
 }
 
 // Function to read the IR sensor based on the direction the motor vehicle is 
@@ -41,49 +70,37 @@ Directions* get_directions(int currentlyFacing)
         //
         case 1:
             dir->currentlyFacing = currentlyFacing;
-            adc_select_input(ADC_FRONT);
-            dir->north = detect_line();
+            dir->north = move45_detect_line(ADC_FRONT);
             dir->south = NULL;
-            adc_select_input(ADC_RIGHT);
-            dir->east = detect_line();
-            adc_select_input(ADC_LEFT);
-            dir->west = adc_read();
+            dir->east = detect_line(ADC_RIGHT);
+            dir->west = detect_line(ADC_LEFT)
             break;
         // South
         //
         case 2:
             dir->currentlyFacing = currentlyFacing;
             dir->north = NULL;
-            adc_select_input(ADC_FRONT);
-            dir->south = detect_line();
-            adc_select_input(ADC_RIGHT);
-            dir->east = detect_line();
-            adc_select_input(ADC_LEFT);
-            dir->west = adc_read();
+            dir->south = move45_detect_line(ADC_FRONT);
+            dir->east = detect_line(ADC_RIGHT);
+            dir->west = detect_line(ADC_LEFT);
             break;
         // East
         //
         case 3:
             dir->currentlyFacing = currentlyFacing;
-            adc_select_input(ADC_LEFT);
-            dir->north = detect_line();
-            adc_select_input(ADC_RIGHT);
-            dir->south = detect_line();
-            adc_select_input(ADC_FRONT);
-            dir->east = adc_read();
+            dir->north = detect_line(ADC_LEFT);
+            dir->south = detect_line(ADC_RIGHT);
+            dir->east = move45_detect_line(ADC_FRONT);
             dir->west = NULL;
             break;
         // West
         //
         case 4:
             dir->currentlyFacing = currentlyFacing;
-            adc_select_input(ADC_RIGHT);
-            dir->north = detect_line();
-            adc_select_input(ADC_LEFT);
-            dir->south = detect_line();
+            dir->north = detect_line(ADC_RIGHT);
+            dir->south = detect_line(ADC_LEFT);
             dir->east = NULL;
-            adc_select_input(ADC_FRONT);
-            dir->west = adc_read();
+            dir->west = move45_detect_line(ADC_FRONT);
             break;
 
         default:
