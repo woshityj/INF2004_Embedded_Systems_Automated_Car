@@ -437,7 +437,7 @@ void generateNeighborCellsForWest(Cell *currentCell)
     currentCell->westNeighbor = newWestNeighbor;
 }
 
-Cell** getMap(Set *set)
+Cell** getMap(struct Set *set)
 {
     Coordinates *arrayOfCords = getColsAndRows(set);
 
