@@ -70,7 +70,7 @@ Directions* get_directions(int currentlyFacing)
         //
         case 1:
             dir->currentlyFacing = currentlyFacing;
-            dir->north = move45_detect_line(ADC_FRONT);
+            dir->north = move45_detect_line(ADC_LEFT);
             dir->south = NULL;
             dir->east = detect_line(ADC_RIGHT);
             dir->west = detect_line(ADC_LEFT)
@@ -80,9 +80,9 @@ Directions* get_directions(int currentlyFacing)
         case 2:
             dir->currentlyFacing = currentlyFacing;
             dir->north = NULL;
-            dir->south = move45_detect_line(ADC_FRONT);
-            dir->east = detect_line(ADC_RIGHT);
-            dir->west = detect_line(ADC_LEFT);
+            dir->south = move45_detect_line(ADC_LEFT);
+            dir->east = detect_line(ADC_LEFT);
+            dir->west = detect_line(ADC_RIGHT);
             break;
         // East
         //
@@ -90,7 +90,7 @@ Directions* get_directions(int currentlyFacing)
             dir->currentlyFacing = currentlyFacing;
             dir->north = detect_line(ADC_LEFT);
             dir->south = detect_line(ADC_RIGHT);
-            dir->east = move45_detect_line(ADC_FRONT);
+            dir->east = move45_detect_line(ADC_LEFT);
             dir->west = NULL;
             break;
         // West
@@ -100,7 +100,7 @@ Directions* get_directions(int currentlyFacing)
             dir->north = detect_line(ADC_RIGHT);
             dir->south = detect_line(ADC_LEFT);
             dir->east = NULL;
-            dir->west = move45_detect_line(ADC_FRONT);
+            dir->west = move45_detect_line(ADC_LEFT);
             break;
 
         default:
