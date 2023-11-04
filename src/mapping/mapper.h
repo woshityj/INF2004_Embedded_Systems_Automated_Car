@@ -23,7 +23,7 @@ typedef struct Cell{
     struct Cell *eastNeighbor;
     struct Cell *westNeighbor;
 
-    Coordinates vector;
+    struct Coordinates vector;
 
 } Cell;
 
@@ -43,6 +43,6 @@ void generateNeighborCellsForNorth(Cell *currentCell);
 void generateNeighborCellsForSouth(Cell *currentCell);
 void generateNeighborCellsForEast(Cell *currentCell);
 void generateNeighborCellsForWest(Cell *currentCell);
-Cell** getMap(Set *set);
+Cell** getMap(struct Set *set);
 
 #endif
