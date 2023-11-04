@@ -23,7 +23,7 @@ typedef struct Cell{
     struct Cell *eastNeighbor;
     struct Cell *westNeighbor;
 
-    Coordinates vector;
+    struct Coordinates vector;
 
 } Cell;
 
