@@ -53,9 +53,9 @@ void move_forward_with_distance(int cm)
         sleep_ms(10);
     }
 
-    stop()
+    stop();
 
-    print("[Motor & Encoder] Moved Forward %dcm", cm);
+    printf("[Motor & Encoder] Moved Forward %dcm", cm);
 
     return;
 }
@@ -87,7 +87,19 @@ void move_backward_with_distance(int cm)
 
     stop();
 
-    print("[Motor & Encoder] Moved Backwards %dcm", cm);
+    printf("[Motor & Encoder] Moved Backwards %dcm", cm);
 
     return;
+}
+
+int main()
+{
+    stdio_usb_init();
+
+    motor_driver_init();
+    encoder_driver_init();
+
+    move_forward_with_distance(50);
+
+    return 1;
 }
