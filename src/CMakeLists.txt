@@ -58,5 +58,6 @@ add_subdirectory(motor)
 add_subdirectory(ultrasonic)
 add_subdirectory(magnetometer)
 add_subdirectory(wifi)
+add_subdirectory(fusion)
 
 add_subdirectory(webserver_and_wifi)

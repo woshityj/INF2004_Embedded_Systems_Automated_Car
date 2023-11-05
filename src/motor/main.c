@@ -90,5 +90,11 @@ void test_motor_set_speed()
 
 int main()
 {
-    test_motor_set_speed();
+    test_motor_turn_left();
+
+    stop();
+    
+    sleep_ms(3000);
+
+    test_motor_turn_right();
 }

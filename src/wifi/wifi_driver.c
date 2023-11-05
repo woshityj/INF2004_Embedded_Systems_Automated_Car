@@ -14,8 +14,8 @@
 #define POLL_TIME_S 20
 
 // WIFI Credentials 
-const char WIFI_SSID[] = "lwrd";
-const char WIFI_PASSWORD[] = "lwrdarren";
+const char WIFI_SSID[] = "yujie";
+const char WIFI_PASSWORD[] = "tyjtyc84";
 
 // ---------------------
 // Struct to store info such as TCP server and client Socket,
