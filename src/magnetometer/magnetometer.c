@@ -25,19 +25,32 @@ int main() {
    stdio_init_all();
 
    // Setup device
-//    lsm303dlh_acc_setup();
-   lsm303dlh_mag_setup();
+   create_mag_setup();
+   create_acc_setup();
+   get_readings();
+   #endif
+   return 0;
+}
 
-//    accel_t acc;
-   mag_t mag;
+// function --------------------------------------------------------------
+void init_i2c_default() {
+   // Initialize I2C with the default settings
+   i2c_init(i2c_default, I2C_BAUD * 1000);
+   gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
+   gpio_set_function(PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C);
+   gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
+   gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
+}
 
-   // Get initial angle
-   lsm303dlh_read_mag(&mag);
+void get_readings() {
+    mag_t mag;
+    accel_t acc;
+    // Get initial angle
+   read_mag(&mag);
    int32_t start_angle = get_angle(&mag);
-
-   while (true) {
-    //    lsm303dlh_read_acc(&acc);
-       lsm303dlh_read_mag(&mag);
+    while (true) {
+       read_mag(&mag);
+       read_acc(&acc);
        int32_t angle = get_angle(&mag);
        int32_t used_angle = angle - start_angle;
 
@@ -58,12 +71,10 @@ int main() {
            orientation = "West";
        }
 
-    // printf("Acc. X = %5d Y = %5d, Z = %5d",
-    //             acc.x,acc.y,acc.z);
-       printf("Mag. X =%4d Y =%4d, Z =%4d, Orientation: %s\n",
-              mag.x, mag.y, mag.z, orientation);
-       // printf("Relative Degree: %4d, True Degree: %4d, Orientation: %s\n",
-       //        used_angle, angle, orientation);
+       printf("Mag. X =%4d Y =%4d, Z =%4d, Orientation: %s, Angle: %4d, Acc. X = %5d Y = %5d, Z = %5d\n",
+              mag.x, mag.y, mag.z, orientation, angle,acc.x ,acc.y ,acc.z);
+    //    printf("Relative Degree: %4d, True Degree: %4d, Orientation: %s\n",
+    //           , angle, orientation);
        sleep_ms(REFRESH_PERIOD);
    }
    #endif

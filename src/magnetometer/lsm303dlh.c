@@ -3,13 +3,12 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
-#include "lsm303dlh.h"
+#include "magnetometer_driver.h"
 
-// Function to set up the accelerometer
-void lsm303dlh_acc_setup() {
+// Function to set up accelerometer
+void create_acc_setup() {
    uint8_t buffer[2] = {CTRL_REG_4, 0x00};
    
-   // Write configuration to the accelerometer
    i2c_write_blocking(
       i2c_default,
       INTERFACE_A,
@@ -28,6 +27,7 @@ void lsm303dlh_acc_setup() {
       2,
       false
    );
+
 }
 
 // Function to set up the magnetometer
@@ -67,12 +67,11 @@ void lsm303dlh_mag_setup() {
 }
 
 // Function to read accelerometer data
-void lsm303dlh_read_acc(accel_t *acc) {
+void read_acc(accel_t *acc) {
    uint8_t buffer[6];
    int16_t accel[3];
    uint8_t reg = ACC_REG;
 
-   // Write the accelerometer register address
    i2c_write_blocking(
       i2c_default,
       INTERFACE_A,
@@ -81,7 +80,6 @@ void lsm303dlh_read_acc(accel_t *acc) {
       true
    );
 
-   // Read accelerometer data
    i2c_read_blocking(
       i2c_default,
       INTERFACE_A,
@@ -90,7 +88,7 @@ void lsm303dlh_read_acc(accel_t *acc) {
       false
    );
 
-   // Merge uint8_t values into int16_t
+   // merge uint8_t to int16_t
    for (int i = 0; i < 3; i++) {
       accel[i] = ((buffer[i * 2] | buffer[(i * 2) + 1]  << 8));
    }
