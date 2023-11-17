@@ -3,6 +3,12 @@
 #include "hardware/pwm.h"
 
 #include "motor_driver.c"
+#include "../encoder/encoder_driver.c"
+#include "pid.c"
+
+#define PID_Kp 2.f
+#define PID_Ki 2.f
+#define PID_Kd 0.f
 
 void test_motor_move_forward()
 {
@@ -90,5 +96,7 @@ void test_motor_set_speed()
 
 int main()
 {
-    test_motor_set_speed();
+    motor_driver_init();
+
+    move_forward_with_distance(100, 70);
 }

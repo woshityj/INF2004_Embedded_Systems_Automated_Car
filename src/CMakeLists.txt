@@ -19,10 +19,13 @@ if (EXISTS ${PICO_LWIP_CONTRIB_PATH}/apps/ping/ping.c)
                 pico_lwip_iperf
                 FreeRTOS-Kernel-Heap4 
                 hardware_adc
+                hardware_pwm
                 pathfinder
                 # FreeRTOS kernel and dynamic heap
                 )
         pico_add_extra_outputs(autonomousCar_nosys)
+
+        pico_enable_stdio_usb(autonomousCar_nosys 1)
         
     add_executable(autonomousCar_sys
             main.c
@@ -45,6 +48,7 @@ if (EXISTS ${PICO_LWIP_CONTRIB_PATH}/apps/ping/ping.c)
         pico_stdlib pico_lwip_iperf 
         FreeRTOS-Kernel-Heap4 
         hardware_adc
+        hardware_pwm
         pathfinder
         ) # FreeRTOS kernel and dynamic heap
 
@@ -58,5 +62,6 @@ add_subdirectory(motor)
 add_subdirectory(ultrasonic)
 add_subdirectory(magnetometer)
 add_subdirectory(wifi)
-
+add_subdirectory(fusion)
 add_subdirectory(webserver_and_wifi)
+add_subdirectory(integration)
