@@ -30,24 +30,6 @@ float compute_pid(PID *pid, float current_value)
     pid->prev_error = error;
 
     return control_signal;
-
-    // // Proportional
-    // //
-    // pid->p = pid->kp * error;
-
-    // // Integral
-    // //
-    // pid->i = pid->ki * error;
-
-    // // Deriative
-    // //
-    // pid->d = pid->kd * (error - pid->prev_error);
-
-    // float output = pid->p + pid->i + pid->d;
-
-    // pid->prev_error = error;
-
-    // return output;
 }
 
 /*!

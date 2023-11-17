@@ -94,24 +94,9 @@ void test_motor_set_speed()
     stop();
 }
 
-void test_left_and_right_pid()
-{
-    pid_t left_motor_pid = create_pid(PID_Kp, PID_Ki, PID_Kd, 0, 0.f, 100.f);
-    pid_t right_motor_pid = create_pid(PID_Kp, PID_Ki, PID_Kd, 0, 0.f, 100.f);
-
-    motor_driver_init();
-    encoder_driver_init();
-
-    
-}
-
 int main()
 {
-    test_motor_turn_left();
+    motor_driver_init();
 
-    stop();
-    
-    sleep_ms(3000);
-
-    test_motor_turn_right();
+    move_forward_with_distance(100, 70);
 }
