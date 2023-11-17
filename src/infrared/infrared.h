@@ -39,7 +39,7 @@ typedef struct {
 } Code39Mapping;
 
 void IR_init();
-bool detect_line();
+bool detect_line(int adc_input);
 Directions* get_directions(int currentlyFacing);
 bool IR_barcode_scan(struct repeating_timer *t);
 void calculate_timing_difference(uint64_t timings[], uint64_t timing_differences[]);
