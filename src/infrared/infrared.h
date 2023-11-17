@@ -12,6 +12,8 @@
 #define IR_PIN_LEFT 27 // ADC 1
 #define IR_PIN_RIGHT 28 // ADC 2
 
+#define ADC_THRESHOLD 1000
+
 #define ADC_FRONT 0
 #define ADC_LEFT 1
 #define ADC_RIGHT 2

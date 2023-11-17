@@ -28,7 +28,7 @@ bool detect_line(int adc_input)
 
     // Line detected
     //
-    if (simpleAvg_result > 1000)
+    if (simpleAvg_result > ADC_THRESHOLD)
     {
         return true;
     }
@@ -160,7 +160,7 @@ bool IR_barcode_scan(struct repeating_timer *t)
 
     // Check if bar is black
     //
-    if (movingAvg_result > 1000)
+    if (movingAvg_result > ADC_THRESHOLD)
     {
 
         // If flag is true, then the previous bar was white, so store the time
