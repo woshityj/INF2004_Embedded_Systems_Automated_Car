@@ -145,7 +145,7 @@ bool IR_barcode_scan(struct repeating_timer *t)
 
     // Select IR sensor to read from
     //
-    adc_select_input(0);
+    adc_select_input(ADC_FRONT);
 
     // Calculate moving average
     //
@@ -489,6 +489,6 @@ void reverse_array(int arr[])
 void IR_init()
 {
     adc_init();
-    adc_gpio_init(IR_PIN_LEFT);
+    adc_gpio_init(IR_PIN_FRONT);
     add_repeating_timer_ms(SAMPLE_RATE_MS, IR_barcode_scan, NULL, &timer);
 }
