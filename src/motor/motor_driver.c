@@ -185,3 +185,75 @@ void stop()
     set_speed(0, MOTOR_LEFT);
     set_speed(0, MOTOR_RIGHT);
 }
+
+
+// Sensor Fusion with Motor and Wheel Encoder
+//
+// bool repeating_timer_callback_isr(struct repeating_timer *t)
+// {
+//     if ((left_interrupts >= *(int*)t->user_data) || (right_interrupts >= *(int*)t->user_data))
+//     {
+//         distance_completed = true;
+//     }
+
+//     return true;
+// }
+
+// void move_forward_with_distance(int cm, int speed)
+// {
+//     int no_of_interrupts = cm_to_interrupts(cm);
+
+//     struct repeating_timer timer;
+
+//     bool distance_completed = false;
+
+//     int left_interrupts = 0;
+//     int right_interrupts = 0;
+
+//     move_forward();
+//     set_speed(speed, MOTOR_LEFT);
+//     set_speed(speed, MOTOR_RIGHT);
+
+//     add_repeating_timer_ms(-10, repeating_timer_callback_isr, &no_of_interrupts, &timer);
+
+//     while (!distance_completed)
+//     {
+//         sleep_ms(10);
+//     }
+
+//     stop();
+
+//     printf("[Motor & Encoder] Moved Forward %dcm\n", cm);
+
+//     return;
+// }
+
+// void move_backward_with_distance(int cm, int speed)
+// {
+//     int no_of_interrupts = cm_to_interrupts(cm);
+
+//     struct repeating_timer timer;
+
+//     bool distance_completed = false;
+
+//     int left_interrupts = 0;
+//     int right_interrupts = 0;
+
+//     move_backward();
+    
+//     set_speed(speed, MOTOR_LEFT);
+//     set_speed(speed, MOTOR_RIGHT);
+
+//     add_repeating_timer_ms(-10, repeating_timer_callback_isr, &no_of_interrupts, &timer);
+
+//     while (!distance_completed)
+//     {
+//         sleep_ms(10);
+//     }
+
+//     stop();
+
+//     printf("[Motor & Encoder] Moved Backwards %dcm\n", cm);
+
+//     return;
+// }

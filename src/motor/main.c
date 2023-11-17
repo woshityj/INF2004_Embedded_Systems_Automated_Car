@@ -3,6 +3,12 @@
 #include "hardware/pwm.h"
 
 #include "motor_driver.c"
+#include "../encoder/encoder_driver.c"
+#include "pid.c"
+
+#define PID_Kp 2.f
+#define PID_Ki 2.f
+#define PID_Kd 0.f
 
 void test_motor_move_forward()
 {
@@ -86,6 +92,17 @@ void test_motor_set_speed()
     sleep_ms(3000);
 
     stop();
+}
+
+void test_left_and_right_pid()
+{
+    pid_t left_motor_pid = create_pid(PID_Kp, PID_Ki, PID_Kd, 0, 0.f, 100.f);
+    pid_t right_motor_pid = create_pid(PID_Kp, PID_Ki, PID_Kd, 0, 0.f, 100.f);
+
+    motor_driver_init();
+    encoder_driver_init();
+
+    
 }
 
 int main()

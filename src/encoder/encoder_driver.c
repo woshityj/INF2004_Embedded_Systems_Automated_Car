@@ -156,11 +156,6 @@ float get_wheel_distance(uint gpio)
     return 0;
 }
 
-int cm_to_interrupts(int cm)
-{
-    return (cm / CM_PER_SLOT);
-}
-
 /*!
 *	@brief      This function initializes GPIO callback functions
 *               for both the Left and Right Encoders

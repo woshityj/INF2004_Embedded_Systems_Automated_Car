@@ -15,19 +15,39 @@
 *                               encoder of the specified motor
 *	@return					    Returns the duty cycle of the specified motor
 */
-float compute_pid(pid_t *pid, float current_value)
+float compute_pid(PID *pid, float current_value)
 {
     float error = pid->setpoint - current_value;
 
-    pid->integral += error;
+    // Integral
+    //
+    pid->i = pid->i + error;
 
     float derivative = error - pid->prev_error;
 
-    float control_signal = (pid->kp * error) + (pid->ki * ( pid->integral )) + (pid->kd * derivative);
+    float control_signal = pid->kp * error + pid->ki * pid->i + pid->kd * derivative;
 
     pid->prev_error = error;
 
     return control_signal;
+
+    // // Proportional
+    // //
+    // pid->p = pid->kp * error;
+
+    // // Integral
+    // //
+    // pid->i = pid->ki * error;
+
+    // // Deriative
+    // //
+    // pid->d = pid->kd * (error - pid->prev_error);
+
+    // float output = pid->p + pid->i + pid->d;
+
+    // pid->prev_error = error;
+
+    // return output;
 }
 
 /*!
@@ -38,11 +58,26 @@ float compute_pid(pid_t *pid, float current_value)
 *   @param[in]  setpoint        Desired speed of the respective motor
 *	@return					    Returns the a newly created PID structure
 */
-pid_t create_pid(float kp, float ki, float kd, float setpoint)
+PID *create_pid(float kp, float ki, float kd, float setpoint)
 {
-    pid_t pid = {kp, ki, kd, setpoint};
-    pid.integral = 0;
-    pid.prev_error = 0;
+    PID *new_pid = malloc(sizeof(PID));
 
-    return pid;
+    if (new_pid != NULL)
+    {
+        new_pid->kp = kp;
+        new_pid->ki = ki;
+        new_pid->kd = kd;
+        new_pid->p = 0;
+        new_pid->i = 0;
+        new_pid->d = 0;
+        new_pid->setpoint = setpoint;
+        new_pid->prev_error = 0.0;
+    }
+
+    return new_pid;
+}
+
+void setpoint_pid(PID *pid, int speed)
+{
+    pid->setpoint = speed;
 }

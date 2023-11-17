@@ -13,19 +13,22 @@ int main()
     encoder_driver_init();
 
     move_forward();
+    set_speed(100, MOTOR_LEFT);
     set_speed(50, MOTOR_RIGHT);
 
     while (true)
     {
-        int speed = get_wheel_speed(2);
+        float speed = get_wheel_speed(2);
+        float right_speed = get_wheel_speed(3);
 
-        printf("Speed is %d km/h\n", speed);
+        printf("Left Speed is %.02f cm/sec\n", speed);
+        printf("Right Speed is %.02f cm/sec\n", right_speed);
 
 
-        sleep_ms(5000);
+        sleep_ms(2000);
 
-        float distance = get_wheel_distance(2);
-        printf("Distance travelled is: %0.2f cm\n", distance);
+        // float distance = get_wheel_distance(2);
+        // printf("Distance travelled is: %0.2f cm\n", distance);
     }
 
     return 1;
