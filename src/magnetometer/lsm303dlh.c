@@ -5,7 +5,7 @@
 #include "hardware/i2c.h"
 #include "magnetometer_driver.h"
 
-// function --------------------------------------------------------------
+// Function to set up accelerometer
 void create_acc_setup() {
    uint8_t buffer[2] = {CTRL_REG_4, 0x00};
    
@@ -31,7 +31,7 @@ void create_acc_setup() {
 }
 
 // Function to set up the magnetometer
-void create_mag_setup() {
+void lsm303dlh_mag_setup() {
    uint8_t buffer[2] = {MAG_CRA, 0x10}; // 15 Hz refresh rate
    
    // Write configuration to the magnetometer
@@ -66,7 +66,7 @@ void create_mag_setup() {
    );
 }
 
-// function --------------------------------------------------------------
+// Function to read accelerometer data
 void read_acc(accel_t *acc) {
    uint8_t buffer[6];
    int16_t accel[3];
@@ -99,7 +99,7 @@ void read_acc(accel_t *acc) {
 }
 
 // Function to read magnetometer data
-void read_mag(mag_t *mag) {
+void lsm303dlh_read_mag(mag_t *mag) {
    uint8_t buffer[6];
    int16_t magnet[3];
    uint8_t reg = MAG_REG;
@@ -149,4 +149,4 @@ int32_t get_angle(mag_t *mag) {
    return angle_deg;
 }
 
-/* end of magnetometer_driver.c */
+/* end of lsm303dlh.c */

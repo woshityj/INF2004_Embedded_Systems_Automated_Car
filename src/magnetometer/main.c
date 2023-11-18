@@ -26,6 +26,7 @@ int main() {
    stdio_init_all();
 
    // Setup device
+   create_acc_setup();
    create_mag_setup();
    get_readings();
    #endif
@@ -44,11 +45,13 @@ void init_i2c_default() {
 
 void get_readings() {
     mag_t mag;
+    accel_t acc;
     // Get initial angle
    read_mag(&mag);
    int32_t start_angle = get_angle(&mag);
     while (true) {
        read_mag(&mag);
+       read_acc(&acc);
        int32_t angle = get_angle(&mag);
        int32_t used_angle = angle - start_angle;
 
@@ -69,8 +72,8 @@ void get_readings() {
            orientation = "West";
        }
 
-       printf("Mag. X =%4d Y =%4d, Z =%4d, Orientation: %s\n",
-              mag.x, mag.y, mag.z, orientation);
+       printf("Mag. X =%4d Y =%4d, Z =%4d, Orientation: %s , Acc. X = %4d Y = %4d, Z = %4d \n",
+              mag.x, mag.y, mag.z, orientation, acc.x,acc.y,acc.z);
     //    printf("Relative Degree: %4d, True Degree: %4d, Orientation: %s\n",
     //           used_angle, angle, orientation);
        sleep_ms(REFRESH_PERIOD);
