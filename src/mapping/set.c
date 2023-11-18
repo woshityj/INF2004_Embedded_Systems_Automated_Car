@@ -124,6 +124,18 @@ Coordinates* getColsAndRows(Set *set)
     return colsAndRowsVector;
 
 }
+
+void destroySet(Set *set) 
+{
+    if (set != NULL) 
+    {
+        if (set->members != NULL) 
+        {
+            free(set->members);
+        }
+        free(set);
+    }
+}
 /* How to use */
 //int main()
 //{

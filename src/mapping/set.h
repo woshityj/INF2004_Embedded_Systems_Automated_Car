@@ -21,5 +21,6 @@ bool is_member(Set *set, Coordinates inputVector);
 void insert(Set *set, Coordinates inputVector);
 void print_set(Set *set);
 Coordinates* getColsAndRows(Set *set);
+void destroySet(Set *set);
 
 #endif

@@ -474,3 +474,17 @@ Cell** getMap(struct Set *set)
     // malloc(sizeof(Cell*rows*cols))
     // walk through the entire set and pluck their addresses one by one
 }
+
+void destroyMaze(Cell *cellToDestroy)
+{
+    if(cellToDestroy == NULL)
+    {
+        return;
+    }
+    destroyMaze(cellToDestroy->northNeighbor);
+    destroyMaze(cellToDestroy->southNeighbor);
+    destroyMaze(cellToDestroy->eastNeighbor);
+    destroyMaze(cellToDestroy->westNeighbor);
+    free(cellToDestroy);
+    return;
+}

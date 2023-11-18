@@ -44,5 +44,6 @@ void generateNeighborCellsForSouth(Cell *currentCell);
 void generateNeighborCellsForEast(Cell *currentCell);
 void generateNeighborCellsForWest(Cell *currentCell);
 Cell** getMap(struct Set *set);
+void destroyMaze(Cell *cellToDestroy);
 
 #endif
