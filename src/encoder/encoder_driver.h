@@ -75,4 +75,10 @@ float get_wheel_distance(uint gpio);
 //
 void encoder_driver_init();
 
+int cm_to_interrupts(int cm);
+
+bool timer_callback_isr_alert(struct repeating_timer *t);
+
+void encoder_alert_after_isr_interrupt(uint target, repeating_timer_callback_t callback);
+
 #endif

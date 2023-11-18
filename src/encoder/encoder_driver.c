@@ -33,6 +33,17 @@
 //
 #define WHEEL_CIRCUMFERENCE_CM (M_PI * WHEEL_DIAMETER_CM)
 
+
+// Global Variables for ISR Counter
+volatile int enable_isr_counter = 0;
+volatile int left_interrupts_isr_counter = 0;
+volatile int right_interrupts_isr_counter = 0;
+volatile int left_interrupts_isr_target_reached = 0;
+volatile int right_interrupts_isr_target_reached = 0;
+volatile int isr_target = 0;
+
+struct repeating_timer isr_alert_timer;
+
 /*!
 *	@brief	            This callback function is called when the Encoder Sensor is high (Edge Rise)
 *                       or when the Encoder Sensor senses the split from the Wheel passing its IR emitter
@@ -49,6 +60,15 @@ void gpio_callback_isr(uint gpio, uint32_t events)
         leftNewTime = time_us_32();
 
         left_interrupts += 1;
+        if (enable_isr_counter && !left_interrupts_isr_target_reached)
+        {
+            left_interrupts_isr_counter += 1;
+
+            if (left_interrupts_isr_counter == isr_target)
+            {
+                left_interrupts_isr_target_reached = 1;
+            }
+        }
     }
 
     if (gpio == GPIO_PIN_ENC_RIGHT)
@@ -57,6 +77,16 @@ void gpio_callback_isr(uint gpio, uint32_t events)
         rightNewTime = time_us_32();
 
         right_interrupts += 1;
+
+        if (enable_isr_counter && !right_interrupts_isr_target_reached)
+        {
+            right_interrupts_isr_counter += 1;
+
+            if (right_interrupts_isr_counter == isr_target)
+            {
+                right_interrupts_isr_target_reached = 1;
+            }
+        }
     }
 }
 
@@ -156,11 +186,6 @@ float get_wheel_distance(uint gpio)
     return 0;
 }
 
-int cm_to_interrupts(int cm)
-{
-    return (cm / CM_PER_SLOT);
-}
-
 /*!
 *	@brief      This function initializes GPIO callback functions
 *               for both the Left and Right Encoders
@@ -171,4 +196,35 @@ void encoder_driver_init()
 
     gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_LEFT, GPIO_IRQ_EDGE_RISE, true, &gpio_callback_isr);
     gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_RIGHT, GPIO_IRQ_EDGE_RISE, true, &gpio_callback_isr);
+}
+
+int cm_to_interrupts(int cm)
+{
+    return (cm / CM_PER_SLOT);
+}
+
+bool timer_callback_isr_alert(struct repeating_timer *t)
+{
+    if (left_interrupts_isr_target_reached && right_interrupts_isr_target_reached)
+    {
+        repeating_timer_callback_t callback = (repeating_timer_callback_t)(t->user_data);
+        enable_isr_counter = 0;
+        return callback(t); // Stops the timer
+    }
+    else
+    {
+        return true;
+    }
+}
+
+void encoder_alert_after_isr_interrupt(uint target, repeating_timer_callback_t callback)
+{
+    left_interrupts_isr_counter = 0;
+    right_interrupts_isr_counter = 0;
+    left_interrupts_isr_target_reached = 0;
+    right_interrupts_isr_target_reached = 0;
+    isr_target = target;
+    enable_isr_counter = 1;
+
+    add_repeating_timer_ms(-10, timer_callback_isr_alert, callback, &isr_alert_timer);
 }

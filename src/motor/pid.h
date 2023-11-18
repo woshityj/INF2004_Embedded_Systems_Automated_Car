@@ -24,10 +24,12 @@ typedef struct _PID {
 
 // Function used to create a new PID Controller structure
 //
-PID* create_pid(float kp, float ki, float kd, float setpoint);
+PID* PID_create(float kp, float ki, float kd, float setpoint);
 
 // Function used to return the duty cycle in percentage (0 - 100) for the repsective motor
 //
-float compute_pid(PID *pid, float current_value);
+float PID_compute(PID *pid, float current_value);
+
+void PID_setpoint(PID *pid, int speed);
 
 #endif

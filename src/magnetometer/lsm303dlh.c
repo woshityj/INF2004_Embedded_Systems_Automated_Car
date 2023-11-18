@@ -5,8 +5,33 @@
 #include "hardware/i2c.h"
 #include "magnetometer_driver.h"
 
+// Function to set up accelerometer
+void create_acc_setup() {
+   uint8_t buffer[2] = {CTRL_REG_4, 0x00};
+   
+   i2c_write_blocking(
+      i2c_default,
+      INTERFACE_A,
+      buffer,
+      2,
+      true
+   );
+
+   buffer[0] = CTRL_REG_1;
+   buffer[1] = 0x27;
+   
+   i2c_write_blocking(
+      i2c_default,
+      INTERFACE_A,
+      buffer,
+      2,
+      false
+   );
+
+}
+
 // Function to set up the magnetometer
-void create_mag_setup() {
+void lsm303dlh_mag_setup() {
    uint8_t buffer[2] = {MAG_CRA, 0x10}; // 15 Hz refresh rate
    
    // Write configuration to the magnetometer
@@ -41,8 +66,40 @@ void create_mag_setup() {
    );
 }
 
+// Function to read accelerometer data
+void read_acc(accel_t *acc) {
+   uint8_t buffer[6];
+   int16_t accel[3];
+   uint8_t reg = ACC_REG;
+
+   i2c_write_blocking(
+      i2c_default,
+      INTERFACE_A,
+      &reg,
+      1,
+      true
+   );
+
+   i2c_read_blocking(
+      i2c_default,
+      INTERFACE_A,
+      buffer,
+      6,
+      false
+   );
+
+   // merge uint8_t to int16_t
+   for (int i = 0; i < 3; i++) {
+      accel[i] = ((buffer[i * 2] | buffer[(i * 2) + 1]  << 8));
+   }
+
+   acc->x = accel[0];
+   acc->y = accel[1];
+   acc->z = accel[2];
+}
+
 // Function to read magnetometer data
-void read_mag(mag_t *mag) {
+void lsm303dlh_read_mag(mag_t *mag) {
    uint8_t buffer[6];
    int16_t magnet[3];
    uint8_t reg = MAG_REG;
@@ -92,4 +149,4 @@ int32_t get_angle(mag_t *mag) {
    return angle_deg;
 }
 
-/* end of magnetometer_driver.c */
+/* end of lsm303dlh.c */

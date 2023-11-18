@@ -17,11 +17,14 @@
 
 #define PWM_CYCLE 12500
 
+static PID *pid_left;
+static PID *pid_right;
+
 /*!
 *	@brief      This function initializes the various GPIO Pins and PWM required
 *				for the Motor Driver Module to operate
 */
-void motor_driver_init()
+void MOTOR_driver_init(PID *left, PID *right)
 {
     printf("[Motor] Init start \n");
 
@@ -48,6 +51,9 @@ void motor_driver_init()
     pwm_config_set_wrap(&pwm_conf, PWM_CYCLE);
 
     pwm_init(pwm_slice, &pwm_conf, true);
+
+    pid_left = left;
+    pid_right = right;
 }
 
 /*!
@@ -55,7 +61,7 @@ void motor_driver_init()
 *               to spin in a Clockwise direction so that it will move forward when
 *               a speed is set
 */
-void move_forward()
+void MOTOR_move_forward()
 {
     // Right Wheel Configuration
     //
@@ -73,7 +79,7 @@ void move_forward()
 *               to spin in a Anti-Clockwise direction so that it will move backwards when
 *               a speed is set
 */
-void move_backward()
+void MOTOR_move_backward()
 {
     // Right Wheel Configuration
     //
@@ -91,7 +97,7 @@ void move_backward()
 *               the Right Motor to spin in a Anti-Clockwise direction so that it will turn
 *               left when a speed is set
 */
-void turn_left()
+void MOTOR_turn_left()
 {
     // Set Right Wheel to go Backward
     //
@@ -109,7 +115,7 @@ void turn_left()
 *               the Right Motor to spin in a Clockwise direction so that it will turn
 *               right when a speed is set
 */
-void turn_right()
+void MOTOR_turn_right()
 {
     // Set Right Wheel to go Forward
     //
@@ -127,7 +133,7 @@ void turn_right()
 *   @param[in]  duty_cycle  Duty cycle of the motor (0 - 100)
 *   @param[in]  motor       Used in indicating which motor to set the duty cycle for
 */
-void set_speed(uint duty_cycle, int motor)
+void MOTOR_set_speed(uint duty_cycle, int motor)
 {
     if (duty_cycle < 0)
     {
@@ -160,7 +166,7 @@ void set_speed(uint duty_cycle, int motor)
 *   @param[in]  motor       Used in indicating which motor to set the duty cycle for
 *	@return					Returns the duty cycle of the specified motor
 */
-int get_speed(int motor)
+int MOTOR_get_speed(int motor)
 {
    if (motor == MOTOR_LEFT)
    {
@@ -180,8 +186,23 @@ int get_speed(int motor)
 *	@brief      This function makes use of the set_speed() function to easily
 *               stop the Left and Right Motors from moving
 */
-void stop()
+void MOTOR_stop()
 {
-    set_speed(0, MOTOR_LEFT);
-    set_speed(0, MOTOR_RIGHT);
+    MOTOR_set_speed(0, MOTOR_LEFT);
+    MOTOR_set_speed(0, MOTOR_RIGHT);
+}
+
+void pid_stop()
+{
+    PID_setpoint(pid_left, 0);
+    PID_setpoint(pid_right, 0);
+}
+
+
+bool pid_stop_callback(struct repeating_timer *t)
+{
+    PID_setpoint(pid_left, 0);
+    PID_setpoint(pid_right, 0);
+
+    return false;
 }
