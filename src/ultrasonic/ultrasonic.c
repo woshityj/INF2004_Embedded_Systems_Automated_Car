@@ -10,6 +10,45 @@ struct repeating_timer timer;
 // Abstracted task returns
 // to be done
 
+bool getObstacle()
+{
+    short numOfZeros = 0;
+    short numOfValids = 0;
+    int totalDistanceInMM = 0;
+    unsigned short millimeters = 0;
+    for(int i = 0; i < SAMPLING_RATE; i++)
+    {
+        millimeters = getMM();
+        // Filtering out the "too high" and "too low" values
+        if(millimeters == 0)
+        {
+            numOfZeros++;
+            if(numOfZeros >= ZERO_THRESHOLD)
+            {
+                return false;
+            }
+        }
+
+        else
+        {
+            totalDistanceInMM += millimeters;
+            numOfValids++;
+        }
+        // This sleep simulates the vTaskDelay() of 50ms, this simulates it being a non-blocking delay when using FreeRTOS-Kernel
+        sleep_ms(50);
+    }
+
+    short average_millimeters = totalDistanceInMM / numOfValids;
+
+    // The obstacle is too far to care
+    if(average_millimeters >= DISTANCE_THRESHOLD)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 unsigned short getMM()
 {
     pulseLength = absolute_time_diff_us(startTime, endTime); // get the echo pin return wave form length
