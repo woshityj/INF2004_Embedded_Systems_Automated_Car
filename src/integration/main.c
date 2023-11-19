@@ -155,11 +155,11 @@ void spot_turn_pid(PID *pid_left, PID *pid_right, int turn_direction, int angle)
     {
         if (angle_error > MIN_TURN_ANGLE / 2)
         {
-            angle = angle + MIN_TURN_ANGLE - angle_error;
+            angle += MIN_TURN_ANGLE - angle_error;
         }
         else
         {
-            angle = angle - angle_error;
+            angle -= angle_error;
         }
     }
 
@@ -198,45 +198,48 @@ int main (void)
     encoder_driver_init();
     IR_init();
 
-    add_repeating_timer_ms(50, repeating_timer_callback_wheel_speed_isr, &state, &state.wheel_speed_timer);
+    add_repeating_timer_ms(-10, repeating_timer_callback_wheel_speed_isr, &state, &state.wheel_speed_timer);
     add_repeating_timer_ms(-200, repeating_timer_callback_pid_isr, &state, &state.pid_timer);
 
-    MOTOR_move_forward();
-    PID_setpoint(state.left_motor_pid, 4);
-    PID_setpoint(state.right_motor_pid, 4);
+    move_forward_with_distance(50, 10, &state);
 
-    while(1)
-    {
-        switch(mode)
-        {
-            case 1:
-                // If condition to check if front has barcode or wall
-                // While there is no wall, move forward a grid
-                move_forward_with_distance(GRID_SIZE, 5, &state);
-                break;
+    spot_turn_pid(state.left_motor_pid, state.right_motor_pid, MOTOR_TURN_CLOCKWISE, 90);
 
-            // Barcode Scanning Mode
-            case 2:
-                struct repeating_timer barcode_timer;
-                move_backward_with_distance(GRID_SIZE / 2, 4, &state);
-                add_repeating_timer_ms(SAMPLE_RATE_MS, IR_barcode_scan, NULL, &barcode_timer);
-                MOTOR_move_forward();
-                PID_setpoint(state.left_motor_pid, 4);
-                PID_setpoint(state.left_motor_pid, 4);
-                // Set IR Sensor to Barcode Scanning Mode
-                // while (condition where barcode scanning mode not completed)
-                // {
-                //     sleep_ms(10);
-                // }
+    // spot_turn_pid(state.left_motor_pid, state.right_motor_pid, 0, 90);
+    while(1);
+
+    // while(1)
+    // {
+    //     switch(mode)
+    //     {
+    //         case 1:
+    //             // If condition to check if front has barcode or wall
+    //             // While there is no wall, move forward a grid
+    //             move_forward_with_distance(GRID_SIZE, 5, &state);
+    //             break;
+
+    //         // Barcode Scanning Mode
+    //         case 2:
+    //             struct repeating_timer barcode_timer;
+    //             move_backward_with_distance(GRID_SIZE / 2, 4, &state);
+    //             add_repeating_timer_ms(SAMPLE_RATE_MS, IR_barcode_scan, NULL, &barcode_timer);
+    //             MOTOR_move_forward();
+    //             PID_setpoint(state.left_motor_pid, 4);
+    //             PID_setpoint(state.left_motor_pid, 4);
+    //             // Set IR Sensor to Barcode Scanning Mode
+    //             // while (condition where barcode scanning mode not completed)
+    //             // {
+    //             //     sleep_ms(10);
+    //             // }
             
-                break;
+    //             break;
                    
 
             
-            default:
-                break;
-        }
-    }
+    //         default:
+    //             break;
+    //     }
+    // }
 
     return 0;
 }
