@@ -45,39 +45,41 @@ static uint motor_right_speed = 0;
 
 // Function to initialize the Motor Driver
 //
-void motor_driver_init();
+void MOTOR_driver_init();
 
 // Function to set the direction of the Left and Right Motors
 // to move forward
 //
-void move_forward();
+void MOTOR_move_forward();
 
 // Function to set the direction of the Left and Right Motors
 // to move backwards
 //
-void move_backward();
+void MOTOR_move_backward();
 
 // Function to set the direction of the Left and Right Motors
 // to turn left
 //
-void turn_left();
+void MOTOR_turn_left();
 
 // Function to set the direction of the Left and Right Motors
 // to turn right
 //
-void turn_right();
+void MOTOR_turn_right();
 
 // Function to set the Left or Right Motor's PWM duty cycle
 //
-void set_speed(uint duty_cycle, int motor);
+void MOTOR_set_speed(uint duty_cycle, int motor);
 
 // Function to retrieve the speed of the Left or Right Motor in
 // terms its duty cycle in percentage
 //
-int get_speed(int motor);
+int MOTOR_get_speed(int motor);
 
 // Function to stop both Left and Right Motor
 //
-void stop();
+void MOTOR_stop();
+
+bool pid_stop_callback(struct repeating_timer *t);
 
 #endif

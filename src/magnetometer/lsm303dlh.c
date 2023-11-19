@@ -5,7 +5,11 @@
 #include "hardware/i2c.h"
 #include "magnetometer_driver.h"
 
+<<<<<<<< HEAD:src/magnetometer/lsm303dlh.c
 // Function to set up accelerometer
+========
+// function --------------------------------------------------------------
+>>>>>>>> master:src/magnetometer/magnetometer_driver.c
 void create_acc_setup() {
    uint8_t buffer[2] = {CTRL_REG_4, 0x00};
    
@@ -66,7 +70,11 @@ void lsm303dlh_mag_setup() {
    );
 }
 
+<<<<<<<< HEAD:src/magnetometer/lsm303dlh.c
 // Function to read accelerometer data
+========
+// function --------------------------------------------------------------
+>>>>>>>> master:src/magnetometer/magnetometer_driver.c
 void read_acc(accel_t *acc) {
    uint8_t buffer[6];
    int16_t accel[3];

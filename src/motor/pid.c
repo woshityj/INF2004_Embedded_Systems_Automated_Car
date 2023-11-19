@@ -15,7 +15,7 @@
 *                               encoder of the specified motor
 *	@return					    Returns the duty cycle of the specified motor
 */
-float compute_pid(PID *pid, float current_value)
+float PID_compute(PID *pid, float current_value)
 {
     float error = pid->setpoint - current_value;
 
@@ -40,7 +40,7 @@ float compute_pid(PID *pid, float current_value)
 *   @param[in]  setpoint        Desired speed of the respective motor
 *	@return					    Returns the a newly created PID structure
 */
-PID *create_pid(float kp, float ki, float kd, float setpoint)
+PID *PID_create(float kp, float ki, float kd, float setpoint)
 {
     PID *new_pid = malloc(sizeof(PID));
 
@@ -59,7 +59,7 @@ PID *create_pid(float kp, float ki, float kd, float setpoint)
     return new_pid;
 }
 
-void setpoint_pid(PID *pid, int speed)
+void PID_setpoint(PID *pid, int speed)
 {
     pid->setpoint = speed;
 }
