@@ -127,9 +127,6 @@ bool IR_barcode_scan(struct repeating_timer *t)
     static bool validBarcode = false;
     static bool isBackwards = false;
     static bool charDetected = false;
-    static bool validBarcode = false;
-    static bool isBackwards = false;
-    static bool charDetected = false;
     static int currentIndex = 0;
 
     // Static variables to store the decoded character and the reverse decoded character
@@ -208,13 +205,6 @@ bool IR_barcode_scan(struct repeating_timer *t)
         find_top_three_timings(timing_differences, &first, &second, &third);
         form_binary_array(timing_differences, char_binary_array, first, second, third);
 
-        // Check for valid barcode
-        //
-        if (!validBarcode)
-        {   
-            // Decode the binary array
-            //
-            decoded_character = decode_array(char_binary_array);
         // Check for valid barcode
         //
         if (!validBarcode)
