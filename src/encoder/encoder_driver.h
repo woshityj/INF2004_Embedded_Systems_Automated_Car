@@ -28,8 +28,6 @@
 //
 const float CM_PER_SLOT = WHEEL_CIRCUMFERENCE_CM / ENCODER_DISC_SLOTS;
 
-struct repeating_timer timer;
-
 // Variables used to keep track of the pulse duration of the Left Encoder
 //
 volatile uint32_t leftNewTime = 0;

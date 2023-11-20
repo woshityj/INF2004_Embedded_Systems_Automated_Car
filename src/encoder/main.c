@@ -9,12 +9,12 @@ int main()
 {
     stdio_usb_init();
 
-    motor_driver_init();
+    // MOTOR_driver_init();
     encoder_driver_init();
 
-    move_forward();
-    set_speed(100, MOTOR_LEFT);
-    set_speed(50, MOTOR_RIGHT);
+    // MOTOR_move_forward();
+    // set_speed(100, MOTOR_LEFT);
+    // set_speed(50, MOTOR_RIGHT);
 
     while (true)
     {

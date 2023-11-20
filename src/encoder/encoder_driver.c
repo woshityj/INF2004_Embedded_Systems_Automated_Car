@@ -15,6 +15,7 @@
 #include "pico/time.h"
 
 #include "encoder_driver.h"
+#include "../ultrasonic/ultrasonic.h"
 
 // Pins connected to each sensors's OUT pin.
 //
@@ -85,6 +86,25 @@ void gpio_callback_isr(uint gpio, uint32_t events)
             if (right_interrupts_isr_counter == isr_target)
             {
                 right_interrupts_isr_target_reached = 1;
+            }
+        }
+    }
+
+    if (gpio == ECHO_PIN)
+    {
+        if(events & GPIO_IRQ_EDGE_RISE) // Ultrasonic sends the signal back
+        {
+            if(startTime == 0)
+            {
+                startTime = time_us_64();    
+            }
+        }
+
+        else if(events & GPIO_IRQ_EDGE_FALL) // Ultrasonic finishes sending signal
+        {
+            if(endTime == 0)
+            {
+                endTime = time_us_64();
             }
         }
     }
@@ -196,6 +216,7 @@ void encoder_driver_init()
 
     gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_LEFT, GPIO_IRQ_EDGE_RISE, true, &gpio_callback_isr);
     gpio_set_irq_enabled_with_callback(GPIO_PIN_ENC_RIGHT, GPIO_IRQ_EDGE_RISE, true, &gpio_callback_isr);
+    gpio_set_irq_enabled_with_callback(ECHO_PIN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &gpio_callback_isr); //enable interrupts by the echo pin
 }
 
 int cm_to_interrupts(int cm)
@@ -226,5 +247,5 @@ void encoder_alert_after_isr_interrupt(uint target, repeating_timer_callback_t c
     isr_target = target;
     enable_isr_counter = 1;
 
-    add_repeating_timer_ms(-10, timer_callback_isr_alert, callback, &isr_alert_timer);
+    add_repeating_timer_ms(-5, timer_callback_isr_alert, callback, &isr_alert_timer);
 }

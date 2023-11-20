@@ -25,7 +25,7 @@
 #define BINARYARRAY_BUFFERSIZE 9
 #define CODE39BUFFER 43
 
-struct repeating_timer timer;
+struct repeating_timer barcode_timer;
 
 typedef struct {
     int currentlyFacing;

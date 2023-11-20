@@ -6,7 +6,7 @@
 
 #include "ultrasonic.h"
 
-struct repeating_timer timer;
+struct repeating_timer ultrasonic_timer;
 // Abstracted task returns
 // to be done
 
@@ -35,7 +35,7 @@ bool getObstacle()
             numOfValids++;
         }
         // This sleep simulates the vTaskDelay() of 50ms, this simulates it being a non-blocking delay when using FreeRTOS-Kernel
-        sleep_ms(50);
+        vTaskDelay(pdMS_TO_TICKS(30));
     }
 
     short average_millimeters = totalDistanceInMM / numOfValids;
@@ -51,7 +51,7 @@ bool getObstacle()
 
 unsigned short getMM()
 {
-    pulseLength = absolute_time_diff_us(startTime, endTime); // get the echo pin return wave form length
+    pulseLength = DIFFERENCE(startTime, endTime); // get the echo pin return wave form length
     unsigned short milliimeters = pulseLength / 6;
     if(milliimeters < 20 || milliimeters > 4000 || pulseLength >= TIMEOUT) // range of the HC-SR04P
     {
@@ -63,17 +63,17 @@ unsigned short getMM()
     return milliimeters;
 }
 
-void initializeUltrasonic(unsigned char triggerPin, unsigned char echoPin)
+void initializeUltrasonic()
 {
     // pin initializings
-    gpio_init(triggerPin);
-    gpio_init(echoPin);
+    gpio_init(TRIGGER_PIN);
+    gpio_init(ECHO_PIN);
 
-    gpio_set_dir(triggerPin, GPIO_OUT);
-    gpio_set_dir(echoPin, GPIO_IN);
+    gpio_set_dir(TRIGGER_PIN, GPIO_OUT);
+    gpio_set_dir(ECHO_PIN, GPIO_IN);
 
-    gpio_set_irq_enabled_with_callback(ECHO_PIN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &echo_interrupt); //enable interrupts by the echo pin
-    add_repeating_timer_ms(SAMPLING_RATE, pullTrigger, NULL, &timer); // Happens to be near 30Hz by setting it to be -30
+    // gpio_set_irq_enabled_with_callback(ECHO_PIN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &echo_interrupt); //enable interrupts by the echo pin
+    add_repeating_timer_ms(30, pullTrigger, NULL, &ultrasonic_timer); // Happens to be near 30Hz by setting it to be -30
 }
 
 int64_t alarm_pulldown_callback(alarm_id_t id, void *user_data)
@@ -88,7 +88,7 @@ void echo_interrupt(uint gpio, uint32_t events)
     {
         if(startTime == 0)
         {
-            startTime = get_absolute_time();    
+            startTime = time_us_64();    
         }
     }
 
@@ -96,7 +96,7 @@ void echo_interrupt(uint gpio, uint32_t events)
     {
         if(endTime == 0)
         {
-            endTime = get_absolute_time();
+            endTime = time_us_64();
         }
     }
 }

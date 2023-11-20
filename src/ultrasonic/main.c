@@ -17,13 +17,14 @@ int main(void)
     // Simulating the FreeRTOS-Kernel task while loop
     while(true)
     {
-        unsigned short millimeters = getMM();
+        bool result = getObstacle();
+        printf("[Test] %d", result);
         // Filtering out the "too high" and "too low" values
-        if(millimeters > 0)
-        {
-            // Integration code adds to a moving buffer to get a more smooth reading
-            printf("The distance is: %dmm\n", millimeters);
-        }
+        // if(millimeters > 0)
+        // {
+        //     // Integration code adds to a moving buffer to get a more smooth reading
+        //     printf("The distance is: %dmm\n", millimeters);
+        // }
 
         // This sleep simulates the vTaskDelay() of 50ms, this simulates it being a non-blocking delay when using FreeRTOS-Kernel
         sleep_ms(50);
