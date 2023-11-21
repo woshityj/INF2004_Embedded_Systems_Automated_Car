@@ -5,7 +5,7 @@
 #define ECHO_PIN 15
 #define SAMPLING_RATE 10
 #define ZERO_THRESHOLD 7 // 66% of sampling_rate
-#define DISTANCE_THRESHOLD 300 // in MM, 300mm == 30cm
+#define DISTANCE_THRESHOLD 200 // in MM, 300mm == 30cm
 #define TIMEOUT 26100
 #define DIFFERENCE(a, b) (a<b ? (b-a) : (a-b))
 

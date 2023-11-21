@@ -157,7 +157,7 @@ void MOTOR_set_speed(uint duty_cycle, int motor)
         motor_right_speed = duty_cycle;
     }
 
-    printf("[Motor] Set speed to %u \n", duty_cycle);
+    // printf("[Motor] Set speed to %u \n", duty_cycle);
 }
 
 /*!

@@ -247,5 +247,5 @@ void encoder_alert_after_isr_interrupt(uint target, repeating_timer_callback_t c
     isr_target = target;
     enable_isr_counter = 1;
 
-    add_repeating_timer_ms(-5, timer_callback_isr_alert, callback, &isr_alert_timer);
+    add_repeating_timer_ms(-2, timer_callback_isr_alert, callback, &isr_alert_timer);
 }

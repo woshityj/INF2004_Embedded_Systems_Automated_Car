@@ -1,7 +1,12 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+
 #include "pico/stdlib.h"
+#include "pico/binary_info.h"
 #include "hardware/gpio.h"
 #include "hardware/adc.h"
+#include "hardware/i2c.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -13,6 +18,13 @@
 #include "../ultrasonic/ultrasonic.h"
 #include "../ultrasonic/ultrasonic.c"
 #include "../infrared/infrared.c"
+#include "../magnetometer/magnetometer_driver.c"
+
+#include "ssi.h"
+#include "cgi.h"
+#include "lwipopts.h"
+#include "lwip/apps/httpd.h"
+#include "pico/cyw43_arch.h"
 
 #define PID_Kp 2.f
 #define PID_Ki 2.f
@@ -28,15 +40,24 @@
 #define MOTOR_TURN_CLOCKWISE 0
 #define MOTOR_TURN_ANTICLOCKWISE 1
 
+#define I2C_BAUD 400 // I2C baud rate (400 kHz)
+#define REFRESH_PERIOD 100 // Refresh period in milliseconds
+
+
 // #define PID_TASK_PRIORITY               ( tskIDLE_PRIORITY + 5UL )
 // #define WHEEL_SPEED_TASK_PRIORITY       ( tskIDLE_PRIORITY + 3UL )
 // #define ULTRASONIC_TASK_PRIORITY        ( tskIDLE_PRIORITY + 1UL )
 
 struct repeating_timer distance_timer;
+mag_t mag;
 
 bool distance_completed = false;
 volatile bool object_detected = false;
 volatile bool object_detection_completed = false;
+
+volatile int starting_angle = 0;
+
+char barcode_char;
 
 typedef struct State
 {
@@ -53,6 +74,67 @@ typedef struct State
 } State;
 
 State state;
+
+// SSI tags - tag length limited to 8 bytes by default
+const char * ssi_tags[] = {"barcode"};
+
+u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen) {
+  size_t printed;
+
+  switch(iIndex)
+  {
+    case 0: // Barcode
+    {
+        printed = snprintf(pcInsert, iInsertLen, "%c", barcode_char);
+        printf("Testing\n");
+        break;
+    }
+    default:
+        printed = 0;
+        break;
+  }
+  // switch (iIndex) {
+  // case 0: // volt
+  //   {
+  //     const float voltage = adc_read() * 3.3f / (1 << 12);
+  //     printed = snprintf(pcInsert, iInsertLen, "%f", voltage);
+  //   }
+  //   break;
+  // case 1: // temp
+  //   {
+  //   const float voltage = adc_read() * 3.3f / (1 << 12);
+  //   const float tempC = 27.0f - (voltage - 0.706f) / 0.001721f;
+  //   printed = snprintf(pcInsert, iInsertLen, "%f", tempC);
+  //   }
+  //   break;
+  // case 2: // led
+  //   {
+  //     bool led_status = cyw43_arch_gpio_get(CYW43_WL_GPIO_LED_PIN);
+  //     if(led_status == true){
+  //       printed = snprintf(pcInsert, iInsertLen, "ON");
+  //     }
+  //     else{
+  //       printed = snprintf(pcInsert, iInsertLen, "OFF");
+  //     }
+  //   }
+  //   break;
+  // default:
+  //   printed = 0;
+  //   break;
+  // }
+
+  return (u16_t)printed;
+}
+
+// Initialise the SSI handler
+void ssi_init() {
+  // Initialise ADC (internal pin)
+  // adc_init();
+  // adc_set_temp_sensor_enabled(true);
+  // adc_select_input(4);
+
+  http_set_ssi_handler(ssi_handler, ssi_tags, LWIP_ARRAYSIZE(ssi_tags));
+}
 
 void move_forward_with_distance(int cm, int speed)
 {
@@ -150,19 +232,79 @@ void spot_turn_pid(int turn_direction, int angle)
         MOTOR_turn_left();
     }
 
+    left_interrupts_isr_counter = 0;
+    right_interrupts_isr_counter = 0;
+    left_interrupts_isr_target_reached = 0;
+    right_interrupts_isr_target_reached = 0;
+    isr_target = interrupts;
+    enable_isr_counter = 1;
+
     PID_setpoint(state.left_motor_pid, 5);
     PID_setpoint(state.right_motor_pid, 5);
-    encoder_alert_after_isr_interrupt(interrupts, pid_stop_callback);
+
+    while (((left_interrupts_isr_target_reached != 1) && (right_interrupts_isr_target_reached != 1)))
+    {
+        vTaskDelay(pdMS_TO_TICKS(2));
+    }
+
+    PID_setpoint(state.left_motor_pid, 0);
+    PID_setpoint(state.right_motor_pid, 0);
+    MOTOR_set_speed(0, MOTOR_LEFT);
+    MOTOR_set_speed(0, MOTOR_RIGHT);
+    enable_isr_counter = 0;
+
+
+    printf("[Encoder] Successfully turned\n");
 }
 
-// void wall_detected()
-// {
-//     PID_setpoint(state.left_motor_pid, 0);
-//     PID_setpoint(state.right_motor_pid, 0);
+void spot_turn_pid_interrupts(int turn_direction, int interrupts)
+{
+    if (MOTOR_TURN_CLOCKWISE == turn_direction)
+    {
+        MOTOR_turn_right();
+    }
+    else if (MOTOR_TURN_ANTICLOCKWISE == turn_direction)
+    {
+        MOTOR_turn_left();
+    }
 
-//     move_backward_with_distance(8, 10);
-//     spot_turn_pid
-// }
+    left_interrupts_isr_counter = 0;
+    right_interrupts_isr_counter = 0;
+    left_interrupts_isr_target_reached = 0;
+    right_interrupts_isr_target_reached = 0;
+    isr_target = interrupts;
+    enable_isr_counter = 1;
+
+    PID_setpoint(state.left_motor_pid, 5);
+    PID_setpoint(state.right_motor_pid, 5);
+
+    while (((left_interrupts_isr_target_reached != 1) && (right_interrupts_isr_target_reached != 1)))
+    {
+        vTaskDelay(pdMS_TO_TICKS(2));
+    }
+
+    PID_setpoint(state.left_motor_pid, 0);
+    PID_setpoint(state.right_motor_pid, 0);
+    MOTOR_set_speed(0, MOTOR_LEFT);
+    MOTOR_set_speed(0, MOTOR_RIGHT);
+    enable_isr_counter = 0;
+
+
+    printf("[Encoder] Successfully turned\n");
+}
+
+void wall_detected_action()
+{
+    PID_setpoint(state.left_motor_pid, 0);
+    PID_setpoint(state.right_motor_pid, 0);
+    MOTOR_set_speed(0, MOTOR_LEFT);
+    MOTOR_set_speed(0, MOTOR_RIGHT);
+
+    move_backward_with_distance(8, 10);
+
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    spot_turn_pid(MOTOR_TURN_CLOCKWISE, 90);
+}
 
 // void barcode_scanning_mode(State *state)
 // {
@@ -204,10 +346,10 @@ void pid_task(__unused void *params)
             MOTOR_set_speed(state.right_motor_duty_cycle, MOTOR_RIGHT);
         }
 
-        printf("SP: %.2f | SPD L: %.2f | DUTY L: %u | [P]%.2f [I]%.2f [D]%.2f (Err: %.2f) \n", state.left_motor_pid->setpoint, state.left_wheel_speed, state.left_motor_duty_cycle, state.left_motor_pid->p, state.left_motor_pid->i, state.left_motor_pid->d, state.left_motor_pid->prev_error);
-        printf("SP: %.2f | SPD R: %.2f | DUTY R: %u | [P]%.2f [I]%.2f [D]%.2f (Err: %.2f) \n", state.right_motor_pid->setpoint, state.right_wheel_speed, state.right_motor_duty_cycle, state.right_motor_pid->p, state.right_motor_pid->i, state.right_motor_pid->d, state.right_motor_pid->prev_error);
+        // printf("SP: %.2f | SPD L: %.2f | DUTY L: %u | [P]%.2f [I]%.2f [D]%.2f (Err: %.2f) \n", state.left_motor_pid->setpoint, state.left_wheel_speed, state.left_motor_duty_cycle, state.left_motor_pid->p, state.left_motor_pid->i, state.left_motor_pid->d, state.left_motor_pid->prev_error);
+        // printf("SP: %.2f | SPD R: %.2f | DUTY R: %u | [P]%.2f [I]%.2f [D]%.2f (Err: %.2f) \n", state.right_motor_pid->setpoint, state.right_wheel_speed, state.right_motor_duty_cycle, state.right_motor_pid->p, state.right_motor_pid->i, state.right_motor_pid->d, state.right_motor_pid->prev_error);
 
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -222,7 +364,7 @@ void ultrasonic_task(__unused void *params)
         if (getObstacle())
         {
             object_detected = true;
-            // printf("[WARNING] Obstacle Detected! Mother die\n");
+            printf("[WARNING] Obstacle Detected! Mother die\n");
         }
         vTaskDelay(1);
     }
@@ -248,33 +390,170 @@ void main_task(__unused void *params)
 {
     printf("[Main Task] Initializing Main Task in FreeRTOS");
 
+    // adc_select_input(ADC_FRONT);
+
+    // MOTOR_move_forward();
+    // PID_setpoint(state.left_motor_pid, 5);
+    // PID_setpoint(state.right_motor_pid, 5);
+
     while (true)
     {
-        if (!object_detected && object_detection_completed == false)
-        {
-            MOTOR_move_forward();
+        // Speed Function for Barcode Scanning Mode
+        //
+        // PID_setpoint(state.left_motor_pid, 4);
+        // PID_setpoint(state.right_motor_pid, 4);
 
-            PID_setpoint(state.left_motor_pid, 10);
-            PID_setpoint(state.right_motor_pid, 10);
-        }
-        else if (object_detected && object_detection_completed == false)
-        {
-            PID_setpoint(state.left_motor_pid, 0);
-            PID_setpoint(state.right_motor_pid, 0);
-            move_backward_with_distance(20, 10);
+        // Speed Function for straight line test
+        //
+        // PID_setpoint(state.left_motor_pid, 5);
+        // PID_setpoint(state.right_motor_pid, 5);
 
-            object_detected = false;
-            object_detection_completed = true;
-        }
-        vTaskDelay(pdMS_TO_TICKS(100));
+        // IR Sensor Function for Wall Detection and Turn
+        
+        // int value = adc_read();
+        // printf("%d\n", value);
+        // if (!object_detected && !object_detection_completed)
+        // {
+        //     if (value >= 1500)
+        //     {
+        //         printf("[Infrared] Wall Detected\n");
+        //         PID_setpoint(state.left_motor_pid, 0);
+        //         PID_setpoint(state.right_motor_pid, 0);
+        //         MOTOR_set_speed(0, MOTOR_LEFT);
+        //         MOTOR_set_speed(0, MOTOR_RIGHT);
+        //         object_detection_completed = true;
+
+
+        //         // vTaskDelay(pdMS_TO_TICKS(1000));
+        //         // move_backward_with_distance(10, 5);
+
+        //         vTaskDelay(pdMS_TO_TICKS(1000));
+
+        //         spot_turn_pid(MOTOR_TURN_CLOCKWISE, 90);
+
+        //         vTaskDelay(pdMS_TO_TICKS(1000));
+        //         move_forward_with_distance(10, 4);
+        //     }
+        // }
+
+        // Function for Ultrasonic Wall Detection
+        //
+        // if (!object_detected && object_detection_completed == false)
+        // {
+        //     MOTOR_move_forward();
+
+        //     PID_setpoint(state.left_motor_pid, 8);
+        //     PID_setpoint(state.right_motor_pid, 8);
+        // }
+        // else if (object_detected && false == object_detection_completed)
+        // {
+        //     PID_setpoint(state.left_motor_pid, 0);
+        //     PID_setpoint(state.right_motor_pid, 0);
+        //     move_backward_with_distance(20, 8);
+
+        //     object_detected = false;
+        //     object_detection_completed = true;
+        // }
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
-
 }
+
+void left_right_ir_task(__unused void *params)
+{
+    printf("[IR] Initializing Left and Right IR Sensors in FreeRTOS");
+    vTaskDelay(pdMS_TO_TICKS(2000));
+
+    while (true)
+    {
+        bool left_wall_detected = detect_line(ADC_LEFT);
+        bool right_wall_detected = detect_line(ADC_RIGHT);
+
+        printf("Left Wall Value: %d \n", left_wall_detected);
+        printf("Right Wall Value: %d \n", right_wall_detected);
+
+        // If Left Wall detected but Right Wall is not detected
+        if (left_wall_detected == 1 && right_wall_detected == 0)
+        {
+            // Turn Right
+            spot_turn_pid_interrupts(MOTOR_TURN_CLOCKWISE, 1);
+            printf("[IR] Turning Left\n");
+        }
+        // If Right Wall detected and Left Wall is not detected
+        else if (right_wall_detected == 1 && left_wall_detected == 0)
+        {
+            // Turn Left
+            spot_turn_pid_interrupts(MOTOR_TURN_ANTICLOCKWISE, 1);
+            printf("[IR] Turning Right\n");
+        }
+        else if (left_wall_detected == 1 && right_wall_detected == 1)
+        {
+            move_forward_with_distance(2, 10);
+        }
+        else
+        {
+            move_forward_with_distance(2, 10);
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(75));
+    }
+}
+
+// Function for Barcode Scanning Task with PID
+//
+void barcode_scanning_task()
+{
+    printf("[IR] Initializing Barcode Scanning in FreeRTOS");
+
+    adc_select_input(ADC_FRONT);
+    while (true)
+    {
+        // int value = adc_read();
+        // printf("%d\n", value);
+        char temp_char = IR_barcode_scan();
+        if (temp_char != '?')
+        {
+            barcode_char = temp_char;
+        }
+        
+        
+
+        vTaskDelay(pdMS_TO_TICKS(1));
+    }
+}
+
+void webserver_task(__unused void *params)
+{
+    vTaskDelay(pdMS_TO_TICKS(10000));
+    // Connect to the WiFI network - loop until connected
+    while(cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000) != 0){
+        printf("Attempting to connect...\n");
+    }
+    // Print a success message once connected
+    printf("Connected! \n");
+    
+    // Initialise web server
+    httpd_init();
+    printf("Http server initialised\n");
+
+    // Configure SSI and CGI handler
+    ssi_init(); 
+    printf("SSI Handler initialised\n");
+    cgi_init();
+    printf("CGI Handler initialised\n");
+
+    printf("IP: %s\n", ip4addr_ntoa(netif_ip_addr4(netif_default)));
+    
+    while (true)
+    {
+
+    }
+}
+
 
 void vLaunch(void)
 {
-    TaskHandle_t ultrasonicTask;
-    xTaskCreate(ultrasonic_task, "Ultrasonic Sensor", configMINIMAL_STACK_SIZE, NULL, 2, &ultrasonicTask);
+    // TaskHandle_t ultrasonicTask;
+    // xTaskCreate(ultrasonic_task, "Ultrasonic Sensor", configMINIMAL_STACK_SIZE, NULL, 2, &ultrasonicTask);
 
     TaskHandle_t pidTask;
     xTaskCreate(pid_task, "PID Task", configMINIMAL_STACK_SIZE, NULL, 2, &pidTask);
@@ -283,7 +562,16 @@ void vLaunch(void)
     xTaskCreate(encoder_task, "Encoder Sensor", configMINIMAL_STACK_SIZE, NULL, 2, &encoderTask);
 
     TaskHandle_t mainTask;
-    xTaskCreate(main_task, "Main Task", configMINIMAL_STACK_SIZE, NULL, 4, &mainTask);
+    xTaskCreate(main_task, "Main Task", configMINIMAL_STACK_SIZE, NULL, 2, &mainTask);
+
+    // TaskHandle_t leftRightIRTask;
+    // xTaskCreate(left_right_ir_task, "Left Right IR Task", configMINIMAL_STACK_SIZE, NULL, 4, &leftRightIRTask);
+
+    TaskHandle_t barcodeScanningTask;
+    xTaskCreate(barcode_scanning_task, "Barcode Scanning Task", configMINIMAL_STACK_SIZE, NULL, 6, &barcodeScanningTask);
+
+    TaskHandle_t webserverTask;
+    xTaskCreate(webserver_task, "Webserver Task", configMINIMAL_STACK_SIZE, NULL, 6, &webserverTask);
 
     vTaskStartScheduler();
 }
@@ -294,16 +582,35 @@ int main (void)
     // Initialization
     stdio_init_all();
 
+    cyw43_arch_init();
+
+    cyw43_arch_enable_sta_mode();
+
     // Mode 1 means mapping mode
     // Mode 2 means barcode scanning mode
     //
-    int mode = 1;
+    // int mode = 1;
 
     state.left_motor_pid = PID_create(PID_Kp, PID_Ki, PID_Kd, 0);
     state.right_motor_pid = PID_create(PID_Kp, PID_Ki, PID_Kd, 0);
 
     encoder_driver_init();
     MOTOR_driver_init(state.left_motor_pid, state.right_motor_pid);
+    IR_init();
+
+    // Function for Barcode Scanning
+    //
+    MOTOR_move_forward();
+    PID_setpoint(state.left_motor_pid, 3);
+    PID_setpoint(state.right_motor_pid, 3);
+
+    // PID_setpoint(state.left_motor_pid, 3);
+    // PID_setpoint(state.right_motor_pid, 3);
+
+
+    // Ultrasonic Sensor Setup
+    // init_i2c_default();
+    // create_mag_setup();
 
     // MOTOR_move_forward();
     // PID_setpoint(state.left_motor_pid, 10);

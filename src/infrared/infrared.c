@@ -1,5 +1,7 @@
 #include "infrared.h"
 
+volatile char barcode_output;
+
 // Helper function to read from an adc input, and check whether the sensor is 
 // on a line or not
 // 
@@ -21,10 +23,12 @@ bool detect_line(int adc_input)
         
         // Using sleep for now, can change to task delay later on
         //
-        sleep_ms(100);
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
     
     simpleAvg_result = simpleAvg_sum/NUMBER_OF_SAMPLES;
+
+    // printf("%d\n", simpleAvg_result);
 
     // Line detected
     //
@@ -111,7 +115,7 @@ Directions* get_directions(int currentlyFacing)
 
 // Callback function used by the repeating timer to scan the barcode
 //
-bool IR_barcode_scan(struct repeating_timer *t)
+char IR_barcode_scan()
 {
     // Static variables to store the moving average of the IR sensor
     //
@@ -124,9 +128,6 @@ bool IR_barcode_scan(struct repeating_timer *t)
     // Static variables to keep track of the state of the barcode scanner
     //
     static bool flag = true;
-    static bool validBarcode = false;
-    static bool isBackwards = false;
-    static bool charDetected = false;
     static bool validBarcode = false;
     static bool isBackwards = false;
     static bool charDetected = false;
@@ -207,14 +208,7 @@ bool IR_barcode_scan(struct repeating_timer *t)
         calculate_timing_difference(timings, timing_differences);
         find_top_three_timings(timing_differences, &first, &second, &third);
         form_binary_array(timing_differences, char_binary_array, first, second, third);
-
-        // Check for valid barcode
-        //
-        if (!validBarcode)
-        {   
-            // Decode the binary array
-            //
-            decoded_character = decode_array(char_binary_array);
+        print_array(char_binary_array);
         // Check for valid barcode
         //
         if (!validBarcode)
@@ -302,6 +296,7 @@ bool IR_barcode_scan(struct repeating_timer *t)
                 else
                 {
                     printf("Character = %c\n", barcode_char);
+                    return barcode_char;
                 }
             }
             // Barcode is being scanned normally
@@ -323,6 +318,7 @@ bool IR_barcode_scan(struct repeating_timer *t)
                 else
                 {
                     printf("Character = %c\n", barcode_char);
+                    return barcode_char;
                 }
             }
 
@@ -338,7 +334,7 @@ bool IR_barcode_scan(struct repeating_timer *t)
         currentIndex = 0;
     }
     
-    return true;
+    return '?';
     
 }
 
@@ -396,11 +392,11 @@ void form_binary_array(uint64_t timing_differences[], int char_binary_array[], u
 
 // Helper function to print an array
 //
-void print_array(uint64_t arr[])
+void print_array(int arr[])
 {
     for (int i = 0; i < BINARYARRAY_BUFFERSIZE; i++)
     {
-        printf("%llu\n", arr[i]);
+        printf("%d\n", arr[i]);
     }
     printf("\n");
 
@@ -501,5 +497,8 @@ void IR_init()
 {
     adc_init();
     adc_gpio_init(IR_PIN_FRONT);
+    adc_gpio_init(IR_PIN_LEFT);
+    adc_gpio_init(IR_PIN_RIGHT);
+
     // add_repeating_timer_ms(SAMPLE_RATE_MS, IR_barcode_scan, NULL, &timer);
 }

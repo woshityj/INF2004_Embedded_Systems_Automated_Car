@@ -29,6 +29,11 @@ float PID_compute(PID *pid, float current_value)
 
     pid->prev_error = error;
 
+    if (control_signal > 100)
+    {
+        control_signal = 100;
+    }
+
     return control_signal;
 }
 
