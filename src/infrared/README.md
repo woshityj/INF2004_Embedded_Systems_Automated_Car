@@ -4,7 +4,7 @@
 
 This sub-module library contains:
 
-1. Encoder Logic `infrared.c`
+1. Infrared and Barcode Logic `infrared.c`
 
 ### Objectives
 The objective of the IR Line Tracking Module is to create abstracted functions to allow developers call upon this module to activate bar code scanning functions for the IR Line sensor as well as to activate and scan the surroundings with the relevant IR Line sensor stationed around the car.
@@ -17,7 +17,7 @@ To identify the surroundings of the motor vehicle, IR sensors are placed at the 
 
 In addition to identifying the surroundings, the IR sensor will be used to scan barcodes in the maze. To determine the binary output of the barcode which is encoded in code39 format, the absolute time is recorded at each state change from white to black and black to white.
 
--- Image to be included --
+![Barcode Character F](Group49Charts/Barcode_F.png)
 
 By obtaining the absolute time at each state change, we are able to calculate the timing differences between each state change and identify the large width bars which will be represented as 1 in binary while small width bars which will be represented as 0 in binary.
 
@@ -47,9 +47,17 @@ Definitions in `infrared.h`:
 #define IR_PIN_RIGHT 28
 #define ADC_RIGHT 2
 
+// Determine the ADC THRESHOLD used to differentiate between white and black lines
+//
+#define ADC_THRESHOLD 1300
+
 // Define the rate at which the CPU samples the ADC ( in ms )
 //
 #define SAMPLE_RATE_MS -1
+
+// Define the number of samples used in simple and moving averages
+//
+#define NUMBER_OF_SAMPLES 10
 
 // Define the array size to capture barcode absolute timings
 //
