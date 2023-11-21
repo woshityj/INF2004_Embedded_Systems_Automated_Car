@@ -48,17 +48,20 @@
 // #define WHEEL_SPEED_TASK_PRIORITY       ( tskIDLE_PRIORITY + 3UL )
 // #define ULTRASONIC_TASK_PRIORITY        ( tskIDLE_PRIORITY + 1UL )
 
-struct repeating_timer distance_timer;
+/* Global Variables to initialize */
+
 mag_t mag;
+struct repeating_timer distance_timer;
 
 bool distance_completed = false;
 volatile bool object_detected = false;
 volatile bool object_detection_completed = false;
-
 volatile int starting_angle = 0;
 
 char barcode_char;
+const char * ssi_tags[] = {"barcode"};
 
+/* Struct definitions */
 typedef struct State
 {
     uint left_motor_duty_cycle;
@@ -74,11 +77,31 @@ typedef struct State
 } State;
 
 State state;
+/* Global Variables Ending*/
 
-// SSI tags - tag length limited to 8 bytes by default
-const char * ssi_tags[] = {"barcode"};
+/* Function prototypes start*/
+u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen);
+void ssi_init();
+void move_forward_with_distance(int cm, int speed);
+void move_backward_with_distance(int cm, int speed);
+void spot_turn_pid(int turn_direction, int angle);
+void spot_turn_pid_interrupts(int turn_direction, int interrupts);
+void wall_detected_action();
+void barcode_scanning_mode(State *state);
+void pid_task(__unused void *params);
+void ultrasonic_task(__unused void *params);
+void encoder_task(__unused void *params);
+void main_task(__unused void *params);
+void left_right_ir_task(__unused void *params);
+void barcode_scanning_task();
+void webserver_task(__unused void *params);
 
-u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen) {
+/* Function prototypes end here*/
+
+
+
+u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen) 
+{
   size_t printed;
 
   switch(iIndex)
@@ -93,49 +116,17 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen) {
         printed = 0;
         break;
   }
-  // switch (iIndex) {
-  // case 0: // volt
-  //   {
-  //     const float voltage = adc_read() * 3.3f / (1 << 12);
-  //     printed = snprintf(pcInsert, iInsertLen, "%f", voltage);
-  //   }
-  //   break;
-  // case 1: // temp
-  //   {
-  //   const float voltage = adc_read() * 3.3f / (1 << 12);
-  //   const float tempC = 27.0f - (voltage - 0.706f) / 0.001721f;
-  //   printed = snprintf(pcInsert, iInsertLen, "%f", tempC);
-  //   }
-  //   break;
-  // case 2: // led
-  //   {
-  //     bool led_status = cyw43_arch_gpio_get(CYW43_WL_GPIO_LED_PIN);
-  //     if(led_status == true){
-  //       printed = snprintf(pcInsert, iInsertLen, "ON");
-  //     }
-  //     else{
-  //       printed = snprintf(pcInsert, iInsertLen, "OFF");
-  //     }
-  //   }
-  //   break;
-  // default:
-  //   printed = 0;
-  //   break;
-  // }
 
   return (u16_t)printed;
 }
 
 // Initialise the SSI handler
-void ssi_init() {
-  // Initialise ADC (internal pin)
-  // adc_init();
-  // adc_set_temp_sensor_enabled(true);
-  // adc_select_input(4);
-
+void ssi_init()
+{
   http_set_ssi_handler(ssi_handler, ssi_tags, LWIP_ARRAYSIZE(ssi_tags));
 }
 
+// Moves forward by distance defined by the programmer
 void move_forward_with_distance(int cm, int speed)
 {
     int no_of_interrupts = cm_to_interrupts(cm);
@@ -167,6 +158,7 @@ void move_forward_with_distance(int cm, int speed)
     return;
 }
 
+// Moves backwards by distance defined by the programmer
 void move_backward_with_distance(int cm, int speed)
 {
     int no_of_interrupts = cm_to_interrupts(cm);
@@ -306,20 +298,20 @@ void wall_detected_action()
     spot_turn_pid(MOTOR_TURN_CLOCKWISE, 90);
 }
 
-// void barcode_scanning_mode(State *state)
-// {
-//     // Remove backwards half a grid
-//     move_backward_with_distance(GRID_SIZE / 2, 10, &state);
+void barcode_scanning_mode(State *state)
+{
+    // Remove backwards half a grid
+    move_backward_with_distance(GRID_SIZE / 2, 10, &state);
 
-//     // Set to move forward at a constant low speed
-//     PID_setpoint(&state->left_motor_pid, 5);
-//     PID_setpoint(&state->right_motor_pid, 5);
+    // Set to move forward at a constant low speed
+    PID_setpoint(&state->left_motor_pid, 5);
+    PID_setpoint(&state->right_motor_pid, 5);
 
-//     // Initialize Front IR Sensor scan for barcode
-//     IR_barcode_scan(&barcode_timer);
+    // Initialize Front IR Sensor scan for barcode
+    IR_barcode_scan(&barcode_timer);
 
-//     return;
-// }
+    return;
+}
 
 // Function is called when an object is detected
 //
@@ -328,8 +320,6 @@ void wall_detected_action()
 void pid_task(__unused void *params)
 {
     printf("[PID] Initializing PID in FreeRTOS");
-
-    // add_repeating_timer_ms(-10, repeating_timer_callback_wheel_speed_isr, &state, &state.wheel_speed_timer);
 
     while (true)
     {
@@ -390,11 +380,11 @@ void main_task(__unused void *params)
 {
     printf("[Main Task] Initializing Main Task in FreeRTOS");
 
-    // adc_select_input(ADC_FRONT);
+    adc_select_input(ADC_FRONT);
 
-    // MOTOR_move_forward();
-    // PID_setpoint(state.left_motor_pid, 5);
-    // PID_setpoint(state.right_motor_pid, 5);
+    MOTOR_move_forward();
+    PID_setpoint(state.left_motor_pid, 5);
+    PID_setpoint(state.right_motor_pid, 5);
 
     while (true)
     {
@@ -410,50 +400,51 @@ void main_task(__unused void *params)
 
         // IR Sensor Function for Wall Detection and Turn
         
-        // int value = adc_read();
-        // printf("%d\n", value);
-        // if (!object_detected && !object_detection_completed)
-        // {
-        //     if (value >= 1500)
-        //     {
-        //         printf("[Infrared] Wall Detected\n");
-        //         PID_setpoint(state.left_motor_pid, 0);
-        //         PID_setpoint(state.right_motor_pid, 0);
-        //         MOTOR_set_speed(0, MOTOR_LEFT);
-        //         MOTOR_set_speed(0, MOTOR_RIGHT);
-        //         object_detection_completed = true;
+        int value = adc_read();
+
+        printf("%d\n", value);
+        if (!object_detected && !object_detection_completed)
+        {
+            if (value >= 1500)
+            {
+                printf("[Infrared] Wall Detected\n");
+                PID_setpoint(state.left_motor_pid, 0);
+                PID_setpoint(state.right_motor_pid, 0);
+                MOTOR_set_speed(0, MOTOR_LEFT);
+                MOTOR_set_speed(0, MOTOR_RIGHT);
+                object_detection_completed = true;
 
 
-        //         // vTaskDelay(pdMS_TO_TICKS(1000));
-        //         // move_backward_with_distance(10, 5);
+                vTaskDelay(pdMS_TO_TICKS(1000));
+                move_backward_with_distance(10, 5);
 
-        //         vTaskDelay(pdMS_TO_TICKS(1000));
+                vTaskDelay(pdMS_TO_TICKS(1000));
 
-        //         spot_turn_pid(MOTOR_TURN_CLOCKWISE, 90);
+                spot_turn_pid(MOTOR_TURN_CLOCKWISE, 90);
 
-        //         vTaskDelay(pdMS_TO_TICKS(1000));
-        //         move_forward_with_distance(10, 4);
-        //     }
-        // }
+                vTaskDelay(pdMS_TO_TICKS(1000));
+                move_forward_with_distance(10, 4);
+            }
+        }
 
         // Function for Ultrasonic Wall Detection
         //
-        // if (!object_detected && object_detection_completed == false)
-        // {
-        //     MOTOR_move_forward();
+        if (!object_detected && object_detection_completed == false)
+        {
+            MOTOR_move_forward();
 
-        //     PID_setpoint(state.left_motor_pid, 8);
-        //     PID_setpoint(state.right_motor_pid, 8);
-        // }
-        // else if (object_detected && false == object_detection_completed)
-        // {
-        //     PID_setpoint(state.left_motor_pid, 0);
-        //     PID_setpoint(state.right_motor_pid, 0);
-        //     move_backward_with_distance(20, 8);
+            PID_setpoint(state.left_motor_pid, 8);
+            PID_setpoint(state.right_motor_pid, 8);
+        }
+        else if (object_detected && false == object_detection_completed)
+        {
+            PID_setpoint(state.left_motor_pid, 0);
+            PID_setpoint(state.right_motor_pid, 0);
+            move_backward_with_distance(20, 8);
 
-        //     object_detected = false;
-        //     object_detection_completed = true;
-        // }
+            object_detected = false;
+            object_detection_completed = true;
+        }
         vTaskDelay(pdMS_TO_TICKS(5));
     }
 }
@@ -525,7 +516,8 @@ void webserver_task(__unused void *params)
 {
     vTaskDelay(pdMS_TO_TICKS(10000));
     // Connect to the WiFI network - loop until connected
-    while(cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000) != 0){
+    while(cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000) != 0)
+    {
         printf("Attempting to connect...\n");
     }
     // Print a success message once connected
@@ -552,8 +544,8 @@ void webserver_task(__unused void *params)
 
 void vLaunch(void)
 {
-    // TaskHandle_t ultrasonicTask;
-    // xTaskCreate(ultrasonic_task, "Ultrasonic Sensor", configMINIMAL_STACK_SIZE, NULL, 2, &ultrasonicTask);
+    TaskHandle_t ultrasonicTask;
+    xTaskCreate(ultrasonic_task, "Ultrasonic Sensor", configMINIMAL_STACK_SIZE, NULL, 2, &ultrasonicTask);
 
     TaskHandle_t pidTask;
     xTaskCreate(pid_task, "PID Task", configMINIMAL_STACK_SIZE, NULL, 2, &pidTask);
@@ -564,8 +556,8 @@ void vLaunch(void)
     TaskHandle_t mainTask;
     xTaskCreate(main_task, "Main Task", configMINIMAL_STACK_SIZE, NULL, 2, &mainTask);
 
-    // TaskHandle_t leftRightIRTask;
-    // xTaskCreate(left_right_ir_task, "Left Right IR Task", configMINIMAL_STACK_SIZE, NULL, 4, &leftRightIRTask);
+    TaskHandle_t leftRightIRTask;
+    xTaskCreate(left_right_ir_task, "Left Right IR Task", configMINIMAL_STACK_SIZE, NULL, 4, &leftRightIRTask);
 
     TaskHandle_t barcodeScanningTask;
     xTaskCreate(barcode_scanning_task, "Barcode Scanning Task", configMINIMAL_STACK_SIZE, NULL, 6, &barcodeScanningTask);
@@ -589,7 +581,7 @@ int main (void)
     // Mode 1 means mapping mode
     // Mode 2 means barcode scanning mode
     //
-    // int mode = 1;
+    int mode = 1;
 
     state.left_motor_pid = PID_create(PID_Kp, PID_Ki, PID_Kd, 0);
     state.right_motor_pid = PID_create(PID_Kp, PID_Ki, PID_Kd, 0);
