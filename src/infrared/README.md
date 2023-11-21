@@ -17,7 +17,7 @@ To identify the surroundings of the motor vehicle, IR sensors are placed at the 
 
 In addition to identifying the surroundings, the IR sensor will be used to scan barcodes in the maze. To determine the binary output of the barcode which is encoded in code39 format, the absolute time is recorded at each state change from white to black and black to white.
 
-![Barcode Character F](Group49Charts\Barcode_F.png)
+![Barcode Character F](Group49Charts/Barcode_F.png)
 
 By obtaining the absolute time at each state change, we are able to calculate the timing differences between each state change and identify the large width bars which will be represented as 1 in binary while small width bars which will be represented as 0 in binary.
 
