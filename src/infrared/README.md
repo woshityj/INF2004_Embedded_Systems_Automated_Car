@@ -75,8 +75,6 @@ Definitions in `infrared.h`:
 //
 #define CODE39BUFFER 43
 
-struct repeating_timer timer;
-
 // Define the struct to hold the directions, each direction holds a value
 // whether a line is present ( true ) or not ( false )
 //
@@ -102,16 +100,20 @@ void IR_init();
 // Helper function to read from an adc input, and check whether the sensor is 
 // on a line or not
 // 
-bool detect_wall();
+bool detect_line(int adc_input);
+
+// Function to detect if front wall is a line or barcode
+//
+bool detect_barcode();
 
 // Function to read the IR sensor based on the direction the motor vehicle is 
 // currently facing and populate the relevant directions ( North, South, East , West )
 //
 Directions* get_directions(int currentlyFacing);
 
-// Callback function used by the repeating timer to scan the barcode
+// Function to start scanning mode
 //
-bool IR_barcode_scan(struct repeating_timer *t);
+char IR_barcode_scan();
 
 // Helper function to calculate the timing difference between 2 timings based
 // on a given array and use the results to populate another array

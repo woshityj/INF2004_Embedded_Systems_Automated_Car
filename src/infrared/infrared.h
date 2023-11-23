@@ -25,8 +25,6 @@
 #define BINARYARRAY_BUFFERSIZE 9
 #define CODE39BUFFER 43
 
-struct repeating_timer barcode_timer;
-
 typedef struct {
     int currentlyFacing;
     bool north;
@@ -42,6 +40,7 @@ typedef struct {
 
 void IR_init();
 bool detect_line(int adc_input);
+char detect_barcode();
 Directions* get_directions(int currentlyFacing);
 char IR_barcode_scan();
 void calculate_timing_difference(uint64_t timings[], uint64_t timing_differences[]);

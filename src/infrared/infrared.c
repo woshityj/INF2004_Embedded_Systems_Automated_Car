@@ -45,6 +45,16 @@ bool detect_line(int adc_input)
     
 }
 
+bool detect_barcode()
+{
+
+    // Stub function for now, will be implemented later
+    //
+
+    return true;
+
+}
+
 // Function to read the IR sensor based on the direction the motor vehicle is 
 // currently facing and populate the relevant directions ( North, South, East , West )
 //
