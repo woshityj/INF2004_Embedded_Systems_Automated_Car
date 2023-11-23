@@ -25,7 +25,7 @@ The obtained binary code from the barcode can thus be converted into the relevan
 
 ### Flowchart
 
--- To be included --
+![Infrared Driver Flowchart](../../Group49Charts/IR_flowchart.png)
 
 ### Header Files
 
