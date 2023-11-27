@@ -34,6 +34,8 @@ int main(void)
     movedForward(currentlyFacing, dir);
     currentlyFacing = NORTH;
     movedForward(currentlyFacing, dir);
+    currentlyFacing = SOUTH;
+    movedForward(currentlyFacing, dir);
 }
 // The only 2 functions that the movement logic needs to call everytime it does something
 void movedForward(int currentlyFacing, Directions* neighbors)
@@ -55,7 +57,7 @@ void movedForward(int currentlyFacing, Directions* neighbors)
       movedWest(currentlyFacing, neighbors);
   }
   printf("moved forward, facing %d\n", currentlyFacing);
-  print_set(allVectorSets);
+  printf("Now at coord x:%d, y:%d\n", currentVector.x, currentVector.y);
 }
 
 // Only works if the maze is already mapped, otherwise will break
