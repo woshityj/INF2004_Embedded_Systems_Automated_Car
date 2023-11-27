@@ -5,8 +5,13 @@
 #define SOUTH 0x2
 #define EAST 0x3
 #define WEST 0x4
+#define DIFFERENCE(a, b) (a<b ? (b-a) : (a-b))
 
-#include "set.h"
+typedef struct Coordinates{
+    int x;      // vector x-axis
+    int y;      // vector y-axis
+    struct Cell *cellAddress;
+} Coordinates;
 
 typedef struct Cell{
     bool origin;
@@ -31,14 +36,39 @@ typedef struct Head{
     struct Cell *genesisCell;
 } Head;
 
+typedef struct {
+    int currentlyFacing;
+    bool north;
+    bool south;
+    bool east;
+    bool west;
+} Directions;
+
+
+/*************Sets*************/
+
+typedef struct Set{
+  Coordinates *members;    // pointer to dynamically allocated array of the set members
+  int length;      // the number of members of the set
+} Set;
+
+Set* init();
+bool is_empty(Set *set);
+bool is_member(Set *set, Coordinates inputVector);
+void insert(Set *set, Coordinates inputVector);
+void print_set(Set *set);
+Coordinates* getColsAndRows(Set *set);
+void destroySet(Set *set);
+
+/**********Mapper**********/
 Cell* generateGenesis();
-void movedForward(int currentlyFacing);
-void movedBackwards(int forwardFacing);
-Cell *initMaze();
-void movedNorth(int currentlyFacing);
-void movedSouth(int currentlyFacing);
-void movedEast(int currentlyFacing);
-void movedWest(int currentlyFacing);
+void movedForward(int currentlyFacing, Directions* neighbors);
+void movedBackwards(int forwardFacing, Directions* neighbors);
+Cell *initMaze(Directions* neighbors);
+void movedNorth(int currentlyFacing, Directions* neighbors);
+void movedSouth(int currentlyFacing, Directions* neighbors);
+void movedEast(int currentlyFacing, Directions* neighbors);
+void movedWest(int currentlyFacing, Directions* neighbors);
 void generateNeighborCellsForNorth(Cell *currentCell);
 void generateNeighborCellsForSouth(Cell *currentCell);
 void generateNeighborCellsForEast(Cell *currentCell);

@@ -3,10 +3,10 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "hardware/adc.h"
+//#include "hardware/adc.h"
 #include "../mapping/mapper.h"
 
-#include "pico/stdlib.h"
+//#include "pico/stdlib.h"
 
 #define IR_PIN_FRONT 26 // ADC 0 
 #define IR_PIN_LEFT 27 // ADC 1
