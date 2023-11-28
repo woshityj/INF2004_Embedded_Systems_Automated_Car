@@ -19,23 +19,50 @@ int main(void)
 {
     printf("Hello world\n");
     Directions* dir = (Directions*)malloc(sizeof(Directions));
-    dir->north = false; // no wall
-    dir->south = true; // wall
-    dir->east = false; // no wall
-    dir->west = true; // wall
+    // assignWalls(dir, north, south, east, west)
+    assignWalls(dir, false, SOUTH_WALL, false, WEST_WALL);
     currentCell = initMaze(dir);
+
     currentlyFacing = EAST; // turn 90 degrees to the East
-    dir->north = true; // wall
-    dir->south = true; // wall
-    dir->east = false; // free space
-    dir->west = false; // no wall if you came from here
+    assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, false);
     movedForward(currentlyFacing, dir);
+
     currentlyFacing = WEST;
     movedForward(currentlyFacing, dir);
+
     currentlyFacing = NORTH;
     movedForward(currentlyFacing, dir);
+
     currentlyFacing = SOUTH;
     movedForward(currentlyFacing, dir);
+
+    Coordinates *rowsAndCols = getColsAndRows(allVectorSets);
+    Coordinates dimensions = rowsAndCols[0];
+    Coordinates lowestValues = rowsAndCols[1];
+    int rows = dimensions.y;
+    int cols = dimensions.x;
+    int lowestX = lowestValues.x;
+    int lowestY = lowestValues.y;
+    printf("Rows: %d, Cols: %d\n", rows, cols);
+    printf("Lowest x value: %d, Lowest y value: %d\n", lowestX, lowestY);
+    Cell **maze = getMap(allVectorSets);
+    Cell mazeCell;
+    for(int i = 0; i < rows; i++)
+    {
+      for(int j = 0; j < cols; j++)
+      {
+        mazeCell = maze[i][j];
+        if(mazeCell.origin == true)
+        {
+          printf("Hello I am the entrance\n");
+        }
+        else if(mazeCell.origin == false && mazeCell.vector.cellAddress != NULL)
+        {
+          printf("I am just a random cell\n");
+        }
+      }
+    }
+    print_set(allVectorSets);
 }
 // The only 2 functions that the movement logic needs to call everytime it does something
 void movedForward(int currentlyFacing, Directions* neighbors)
@@ -83,6 +110,13 @@ void movedBackwards(int forwardFacing, Directions* neighbors)
 
 // API ends
 
+void assignWalls(Directions *dir, bool northWall, bool southWall, bool eastWall, bool westWall)
+{
+    dir->north = northWall;
+    dir->south = southWall;
+    dir->east = eastWall;
+    dir->west = westWall;
+}
 
 Cell *initMaze(Directions* neighbors)
 {
@@ -93,7 +127,7 @@ Cell *initMaze(Directions* neighbors)
 
     currentVector.x = 0;
     currentVector.y = 0;
-
+    currentVector.cellAddress = startOfMaze.genesisCell;
     // Puts x,y = 0 into the set to mark as a visited cell
     insert(allVectorSets, currentVector);
     // Generate the genesis cell
@@ -133,7 +167,7 @@ Cell *initMaze(Directions* neighbors)
         currentCell->westNeighbor = NULL;
     }
     previousCell = currentCell;
-    printf("Generated Maze\n");
+
     return currentCell; // returns the cell's address to the main callee
 }
 
@@ -143,6 +177,7 @@ void movedNorth(int currentlyFacing, Directions* neighbors)
     currentlyFacing = NORTH;
     currentVector.x = previousCell->vector.x;
     currentVector.y = previousCell->vector.y + 1;
+    currentVector.cellAddress = currentCell;
 
     if(!is_member(allVectorSets, currentVector)) // iff the currentVector position is not in the set
     {
@@ -211,6 +246,7 @@ void movedSouth(int currentlyFacing, Directions* neighbors)
     currentlyFacing = SOUTH;
     currentVector.x = previousCell->vector.x;
     currentVector.y = previousCell->vector.y - 1;
+    currentVector.cellAddress = currentCell;
 
     if(!is_member(allVectorSets, currentVector)) // iff the currentVector position is not in the set
     {
@@ -276,16 +312,17 @@ void movedSouth(int currentlyFacing, Directions* neighbors)
 
 void movedEast(int currentlyFacing, Directions* neighbors)
 {
-    printf("Attempting to move east\n");
+
     currentCell = previousCell->eastNeighbor;
     //currentCell = malloc(sizeof(Cell));
     currentlyFacing = EAST;
     currentVector.x = previousCell->vector.x + 1;
     currentVector.y = previousCell->vector.y;
-    printf("no errors yet\n");
+    currentVector.cellAddress = currentCell;
+
     if(!is_member(allVectorSets, currentVector)) // iff the currentVector position is not in the set
     {
-        printf("new member\n");
+
         insert(allVectorSets, currentVector);
 
         generateNeighborCellsForEast(currentCell);
@@ -340,7 +377,7 @@ void movedEast(int currentlyFacing, Directions* neighbors)
             currentCell->eastNeighbor = NULL;
         }
     }
-    printf("Moved east successfully\n");
+
     previousCell = currentCell; // update the previous cell
 }
 
@@ -350,10 +387,11 @@ void movedWest(int currentlyFacing, Directions* neighbors)
     currentlyFacing = WEST;
     currentVector.x = previousCell->vector.x - 1;
     currentVector.y = previousCell->vector.y;
+    currentVector.cellAddress = currentCell;
 
     if(!is_member(allVectorSets, currentVector)) // iff the currentVector position is not in the set
     {
-        printf("new member\n");
+
         insert(allVectorSets, currentVector);
 
         generateNeighborCellsForWest(currentCell);
@@ -412,49 +450,6 @@ void movedWest(int currentlyFacing, Directions* neighbors)
     }
 
     previousCell = currentCell; // update the previous cell
-}
-
-Cell* generateGenesis()
-{
-
-    // allocate memory for one Cell
-    Cell *genesisCell = malloc(sizeof(Cell));
-
-    if(genesisCell == NULL)
-    {
-        exit(1);
-    }
-
-    genesisCell->origin = true;
-    genesisCell->ending = false;
-
-    genesisCell->southWall = false; // Assumes false so the map can have a hole in it to signify it's the start
-    
-    // assumes every other direction is clear for now
-    genesisCell->northWall = false;
-    genesisCell->eastWall = false;
-    genesisCell->westWall = false; // change these to the function call for the eyes IR
-
-    // starts at origin
-    genesisCell->vector.x = 0; // puts the value 0 into x
-    genesisCell->vector.y = 0; // puts the value 0 into y
-    currentCell->vector.cellAddress = genesisCell;
-
-    Cell *newNorthNeighbor = malloc(sizeof(Cell));
-    Cell *newEastNeighbor = malloc(sizeof(Cell));
-    Cell *newWestNeighbor = malloc(sizeof(Cell));
-
-    if(newNorthNeighbor == NULL || newEastNeighbor == NULL || newWestNeighbor == NULL)
-    {
-        exit(1);
-    }
-    // Assumes it all directions neighbors
-    genesisCell->northNeighbor = newNorthNeighbor;
-    genesisCell->southNeighbor = NULL; // genesis always has a NULL south
-    genesisCell->eastNeighbor = newEastNeighbor;
-    genesisCell->westNeighbor = newWestNeighbor;
-
-    return genesisCell;
 }
 
 void generateNeighborCellsForNorth(Cell *currentCell) // just generates and initializes all the information required
@@ -618,6 +613,7 @@ void insert(Set *set, Coordinates inputVector)
     // put the member into the set at the next available index
     set->members[set->length].x = inputVector.x;
     set->members[set->length].y = inputVector.y;
+    set->members[set->length].cellAddress = inputVector.cellAddress;
     // increment the set length to acknowledge the new length of the set
     set->length = set->length + 1;
     
@@ -631,9 +627,9 @@ void print_set(Set *set)
   for (int i = 0; i < set->length; i++)
   {
       if (i == (set->length - 1))
-        printf("x:%d  y: %d\n", set->members[i].x, set->members[i].y);
+        printf("x:%d  y:%d\n", set->members[i].x, set->members[i].y);
       else
-        printf("x:%d  y:%d\n,", set->members[i].x, set->members[i].y);
+        printf("x:%d  y:%d\n", set->members[i].x, set->members[i].y);
   }
 }
 
@@ -641,8 +637,8 @@ Coordinates* getColsAndRows(Set *set)
 {
     unsigned short size = set->length;
 
-    Coordinates *colsAndRowsVector = (Coordinates *)(2 * sizeof(Coordinates));
-    
+    Coordinates *colsAndRowsVector = (Coordinates *)malloc((2 * sizeof(Coordinates)));
+  
     if(colsAndRowsVector == NULL)
     {
         exit(1);
@@ -677,8 +673,8 @@ Coordinates* getColsAndRows(Set *set)
         }
     }
 
-    short rows = DIFFERENCE(lowestY, highestY);
-    short columns = DIFFERENCE(lowestX, highestX);
+    short rows = DIFFERENCE(lowestY, highestY) + 1;
+    short columns = DIFFERENCE(lowestX, highestX) + 1;
 
     colsAndRowsVector[0].y = rows;
     colsAndRowsVector[0].x = columns;

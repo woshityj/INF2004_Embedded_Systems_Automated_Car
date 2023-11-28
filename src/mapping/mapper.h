@@ -7,6 +7,11 @@
 #define WEST 0x4
 #define DIFFERENCE(a, b) (a<b ? (b-a) : (a-b))
 
+#define NORTH_WALL true
+#define SOUTH_WALL true
+#define EAST_WALL true
+#define WEST_WALL true
+
 typedef struct Coordinates{
     int x;      // vector x-axis
     int y;      // vector y-axis
@@ -61,7 +66,7 @@ Coordinates* getColsAndRows(Set *set);
 void destroySet(Set *set);
 
 /**********Mapper**********/
-Cell* generateGenesis();
+void assignWalls(Directions *dir, bool northWall, bool southWall, bool eastWall, bool westWall);
 void movedForward(int currentlyFacing, Directions* neighbors);
 void movedBackwards(int forwardFacing, Directions* neighbors);
 Cell *initMaze(Directions* neighbors);
