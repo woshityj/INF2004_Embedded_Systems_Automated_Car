@@ -17,11 +17,12 @@
 const char WIFI_SSID[] = "yujie";
 const char WIFI_PASSWORD[] = "tyjtyc84";
 
-// ---------------------
-// Struct to store info such as TCP server and client Socket,
-// flag indicating completion of communication,
-// message and reply buffer, length of message and reply
-//
+/*!
+*	@brief      Struct to store info such as TCP server and client Socket,
+*               flag indicating completion of communication,
+*               message and reply buffer, length of message and reply
+*/
+
 typedef struct TCP_SERVER_T_ {
     struct tcp_pcb *server_pcb;
     struct tcp_pcb *client_pcb;
@@ -32,11 +33,12 @@ typedef struct TCP_SERVER_T_ {
     int recv_len;
 } TCP_SERVER_T;
 
-// ---------------------
-// Function that initializes a new TCP server state,
-// allocating memory for the state structure and returns a pointer
-// If state cannot be allocated function returns NULL
-//
+
+/*!
+*	@brief      Function that initializes a new TCP server state,
+*               allocating memory for the state structure and returns a pointer
+*               If state cannot be allocated function returns NULL
+*/
 static TCP_SERVER_T* tcp_server_init(void) {
     TCP_SERVER_T *state = calloc(1, sizeof(TCP_SERVER_T));
     if (!state) {
@@ -46,12 +48,12 @@ static TCP_SERVER_T* tcp_server_init(void) {
     return state;
 }
 
-// ---------------------
-// Function that closes TCP server connection
-// When called, checks if there is a client connected
-// If there is it sets all callbacks, 
-// client pcb and server pcb to NULL and closes the server
-// 
+/*!
+*	@brief      Function that closes TCP server connection
+*               When called, checks if there is a client connected
+*               If there is it sets all callbacks, 
+*               client pcb and server pcb to NULL and closes the server
+*/
 static err_t tcp_server_close(void *arg) {
     TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
     err_t err = ERR_OK;
@@ -77,12 +79,12 @@ static err_t tcp_server_close(void *arg) {
     return err;
 }
 
-// ---------------------
-// Function to close TCP client connection
-// Checks for connected client, if there is
-// Sets callbacks to NULL, disconnects client
-// and resets client pcb, sent_len and recv_len
-//
+/*!
+*	@brief          Function to close TCP client connection
+*                   Checks for connected client, if there is
+*                   Sets callbacks to NULL, disconnects client
+*                   and resets client pcb, sent_len and recv_len
+*/
 static err_t tcp_client_close(void *arg)
 {
     TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
@@ -113,12 +115,11 @@ static err_t tcp_client_close(void *arg)
 
     return err;
 }
-
-// ---------------------
-// Function to check if communication is successful
-// Called when TCP has finished communication
-// Sets complete flag to indicate end of operation
-// 
+/*!
+*	@brief          Function to check if communication is successful
+*                   Called when TCP has finished communication
+*                   Sets complete flag to indicate end of operation
+*/
 static err_t tcp_server_result(void *arg, int status) {
     TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
     if (status == 0) {
@@ -131,12 +132,13 @@ static err_t tcp_server_result(void *arg, int status) {
     return ERR_OK;
 }
 
-// ---------------------
-// Function is called after server sends message to client
-// Sets sent_len to length of message sent
-// and recv_len to zero to indicate server is expecting 
-// a reply from client
-//
+
+/*!
+*	@brief          Function is called after server sends message to client
+*                   CSets sent_len to length of message sent
+*                   and recv_len to zero to indicate server is expecting 
+*                   a reply from client
+*/
 static err_t tcp_server_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
     TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
     DEBUG_printf("tcp_server_sent %u\n", len);
@@ -148,15 +150,14 @@ static err_t tcp_server_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
 
     return ERR_OK;
 }
-
-// ---------------------
-// Function to send message to client connected
-// Copies message receive from client over to 
-// reply buffer and retransmit the message back
-// to the client using tcp_write
-// Server calls tcp_client_close to disconnect
-// client after 
-//
+/*!
+*   @brief          to send message to client connected
+*                   Copies message receive from client over to 
+*                   reply buffer and retransmit the message back
+*                   to the client using tcp_write
+*                   Server calls tcp_client_close to disconnect
+*                   client after 
+*/
 err_t tcp_server_send_data(void *arg, struct tcp_pcb *tpcb, char message[BUF_SIZE])
 {
     TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
@@ -183,12 +184,12 @@ err_t tcp_server_send_data(void *arg, struct tcp_pcb *tpcb, char message[BUF_SIZ
     return ERR_OK;
 }
 
-// ---------------------
-// Function to receive message from client connected
-// Called when the server receives data from client
-// Once it receives the entire buffer of data
-// it calls tcp_server_send_data to send a reply to client
-// 
+/*!
+*   @brief          Function to receive message from client connected
+*                   Called when the server receives data from client
+*                   Once it receives the entire buffer of data
+*                   it calls tcp_server_send_data to send a reply to client
+*/
 err_t tcp_server_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err) {
     TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
     if (!p) 
@@ -218,24 +219,25 @@ err_t tcp_server_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
     return tcp_server_send_data(arg, state->client_pcb, state->buffer_recv);
 }
 
-// ---------------------
-// Function to check Client connection
-// Called after connection has been idle 
-// for a set time interval, to kill the connection
-// calls tcp_server_result to change flag to complete 
-// to indicate end of operation 
-//
+
+/*!
+*   @brief          Function to check Client connection
+*                   Called after connection has been idle
+*                   for a set time interval, to kill the connection
+*                   calls tcp_server_result to change flag to complete 
+*                   to indicate end of operation 
+*/
 static err_t tcp_server_poll(void *arg, struct tcp_pcb *tpcb) {
     DEBUG_printf("tcp_server_poll_fn\n");
     return tcp_server_result(arg, -1); // no response is an error?
 }
 
-// ---------------------
-// Function to indicate fatal error in connection
-// Called when a fatal error in connection has occurred
-// Calls tcp_server_result to set flag to complete
-// to indicate end of operation
-// 
+/*!
+*   @brief          Function to indicate fatal error in connection
+*                   Called when a fatal error in connection has occurred
+*                   Calls tcp_server_result to set flag to complete
+*                   to indicate end of operation 
+*/
 static void tcp_server_err(void *arg, err_t err) {
     if (err != ERR_ABRT) {
         DEBUG_printf("tcp_client_err_fn %d\n", err);
@@ -243,12 +245,12 @@ static void tcp_server_err(void *arg, err_t err) {
     }
 }
 
-// ---------------------
-// Function to set callbacks to other functions
-// Called when a client connects to the server
-// Stores the client PCB variable and sets up
-// callback functions
-//
+/*!
+*   @brief          Function to set callbacks to other functions
+*                   Called when a client connects to the server
+*                   Stores the client PCB variable and sets up
+*                   callback functions
+*/
 static err_t tcp_server_accept(void *arg, struct tcp_pcb *client_pcb, err_t err) {
     TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
     if (err != ERR_OK || client_pcb == NULL) {
@@ -268,13 +270,13 @@ static err_t tcp_server_accept(void *arg, struct tcp_pcb *client_pcb, err_t err)
     return ERR_OK;
 }
 
-// ---------------------
-// Function to Open TCP server
-// Creates a new PCB based on IP
-// Binding it to the specified port
-// and sets up callback functions to accept 
-// incoming connections
-// 
+/*!
+*   @brief          Function to Open TCP server
+*                   Creates a new PCB based on IP
+*                   Binding it to the specified port
+*                   and sets up callback functions to accept 
+*                   incoming connections
+*/
 static bool tcp_server_open(void *arg) {
     TCP_SERVER_T *state = (TCP_SERVER_T*)arg;
     DEBUG_printf("Starting server at %s on port %u\n", ip4addr_ntoa(netif_ip4_addr(netif_list)), TCP_PORT);
@@ -306,13 +308,13 @@ static bool tcp_server_open(void *arg) {
     return true;
 }
 
-// ---------------------
-// Function to Run TCP server
-// Calls tcp_server_init to initialise a server state
-// Opens a server by calling tcp_server_open by providing state 
-// as arg
-// Continues looping until server has finished communication
-//
+/*!
+*   @brief          Function to Run TCP server
+*                   Calls tcp_server_init to initialise a server state
+*                   Opens a server by calling tcp_server_open by providing state 
+*                   as arg 
+*                   Continues looping until server has finished communication
+*/
 void run_tcp_server(void)
 {
     TCP_SERVER_T *state = tcp_server_init();
@@ -334,13 +336,12 @@ void run_tcp_server(void)
 
     free(state);
 }
-
-// ---------------------
-// Function to initialize wifi module
-// Connects to specified SSID and calls
-// run_tcp_server to start tcp server 
-// once connected to the SSID
-// 
+/*!
+*   @brief          Function to initialize wifi module
+*                   Connects to specified SSID and calls
+*                   run_tcp_server to start tcp server 
+*                   once connected to the SSID
+*/
 void wifi_init()
 {
     if (cyw43_arch_init())
