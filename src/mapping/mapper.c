@@ -20,30 +20,134 @@ int main(void)
 {
     printf("Hello world\n");
     Directions* dir = (Directions*)malloc(sizeof(Directions));
-    // assignWalls(dir, north, south, east, west)
-    assignWalls(dir, false, SOUTH_WALL, false, false);
+    assignWalls(dir, false, false, false, false);
     currentCell = initMaze(dir);
 
+    currentlyFacing = WEST; // turn 90 degrees to the West
+    assignWalls(dir, false, SOUTH_WALL, false, WEST_WALL);
+    movedForward(currentlyFacing, dir);
     
-    currentlyFacing = WEST;
-    assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, WEST_WALL); // dead-end
-    movedForward(currentlyFacing, dir);
-
-    currentlyFacing = EAST;
-    movedForward(currentlyFacing, dir); // get out of dead-end
-
-    //currentlyFacing = EAST; // turn 90 degrees to the East
-    assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, false);
+    currentlyFacing = NORTH;
+    assignWalls(dir, NORTH_WALL, false, EAST_WALL, false);
     movedForward(currentlyFacing, dir);
 
     currentlyFacing = WEST;
+    assignWalls(dir, NORTH_WALL, false, false, WEST_WALL);
     movedForward(currentlyFacing, dir);
-
-    assignWalls(dir, false, false, EAST_WALL, WEST_WALL);
+    
+    currentlyFacing = SOUTH;
+    assignWalls(dir, false, SOUTH_WALL, EAST_WALL, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+    
     currentlyFacing = NORTH;
     movedForward(currentlyFacing, dir);
 
+    currentlyFacing = EAST;
+    movedForward(currentlyFacing, dir);
+
     currentlyFacing = SOUTH;
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = EAST;
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = NORTH;
+    assignWalls(dir, NORTH_WALL, false, EAST_WALL, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = SOUTH;
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = EAST;
+    assignWalls(dir, false, SOUTH_WALL, EAST_WALL, false);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = NORTH;
+    assignWalls(dir, false, false, EAST_WALL, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+
+    movedForward(currentlyFacing, dir);
+    assignWalls(dir, false, false, EAST_WALL, false);
+
+    currentlyFacing = WEST;
+    assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, false);
+    movedForward(currentlyFacing, dir);
+
+    assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, false);
+    movedForward(currentlyFacing, dir);
+    
+    assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = EAST;
+    movedForward(currentlyFacing, dir);
+
+    movedForward(currentlyFacing, dir);
+
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = NORTH;
+    assignWalls(dir, false, false, EAST_WALL, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+
+    assignWalls(dir, NORTH_WALL, false, EAST_WALL, false);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = WEST;
+    assignWalls(dir, false, false, false, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = SOUTH;
+    assignWalls(dir, false, SOUTH_WALL, EAST_WALL, false);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = WEST;
+    assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, false);
+    movedForward(currentlyFacing, dir);
+
+    assignWalls(dir, false, SOUTH_WALL, false, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = NORTH;
+    assignWalls(dir, NORTH_WALL, false, EAST_WALL, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = SOUTH;
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = EAST;
+    movedForward(currentlyFacing, dir);
+
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = NORTH;
+    movedForward(currentlyFacing, dir);
+
+    assignWalls(dir, NORTH_WALL, false, false, false);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = EAST;
+    assignWalls(dir, NORTH_WALL, SOUTH_WALL, EAST_WALL, false);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = WEST;
+    movedForward(currentlyFacing, dir);
+
+    assignWalls(dir, false, false, false, false);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = SOUTH;
+    assignWalls(dir, false, SOUTH_WALL, EAST_WALL, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = NORTH;
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = WEST;
+    assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = EAST;
     movedForward(currentlyFacing, dir);
 
     Coordinates *rowsAndCols = getColsAndRows(allVectorSets);
@@ -445,7 +549,7 @@ void movedWest(int currentlyFacing, Directions* neighbors)
         currentCell->westWall = neighbors->west;
 
         // IFF all these conditions return false, then it is considered the end of the maze
-        if(!(currentCell->northWall & currentCell->southWall & currentCell->westWall))
+        if(currentCell->northWall == false && currentCell->southWall == false && currentCell->westWall == false)
         {
             currentCell->ending = true;
             currentCell->northWall = true;
