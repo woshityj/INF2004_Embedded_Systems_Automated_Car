@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 //#include "../infrared/infrared.h"
 
 #include "mapper.h"
@@ -20,10 +21,18 @@ int main(void)
     printf("Hello world\n");
     Directions* dir = (Directions*)malloc(sizeof(Directions));
     // assignWalls(dir, north, south, east, west)
-    assignWalls(dir, false, SOUTH_WALL, false, WEST_WALL);
+    assignWalls(dir, false, SOUTH_WALL, false, false);
     currentCell = initMaze(dir);
 
-    currentlyFacing = EAST; // turn 90 degrees to the East
+    
+    currentlyFacing = WEST;
+    assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, WEST_WALL); // dead-end
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = EAST;
+    movedForward(currentlyFacing, dir); // get out of dead-end
+
+    //currentlyFacing = EAST; // turn 90 degrees to the East
     assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, false);
     movedForward(currentlyFacing, dir);
 
@@ -543,8 +552,8 @@ Cell** getMap(struct Set *set)
 
     short rows = dimensions.y;
     short cols = dimensions.x;
-    short lowestX = lowestValues.x;
-    short lowestY = lowestValues.y;
+    short lowestX = abs(lowestValues.x);
+    short lowestY = abs(lowestValues.y);
 
     Cell **mapGrid = (Cell **)calloc(rows, sizeof(Cell *));
 
