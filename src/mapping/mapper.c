@@ -30,6 +30,7 @@ int main(void)
     currentlyFacing = WEST;
     movedForward(currentlyFacing, dir);
 
+    assignWalls(dir, false, false, EAST_WALL, WEST_WALL);
     currentlyFacing = NORTH;
     movedForward(currentlyFacing, dir);
 
@@ -47,7 +48,8 @@ int main(void)
     printf("Lowest x value: %d, Lowest y value: %d\n", lowestX, lowestY);
     Cell **maze = getMap(allVectorSets);
     Cell mazeCell;
-    for(int i = 0; i < rows; i++)
+    // This for loop represents the map from top left to bottom right as a 2D grid
+    for(int i = rows - 1; i >= 0; i--)
     {
       for(int j = 0; j < cols; j++)
       {
@@ -172,7 +174,12 @@ Cell *initMaze(Directions* neighbors)
 }
 
 void movedNorth(int currentlyFacing, Directions* neighbors)
-{
+{   
+    if(previousCell->northWall == true)
+    {
+        printf("Cannot go here!\n");
+        return;
+    }
     currentCell = previousCell->northNeighbor;
     currentlyFacing = NORTH;
     currentVector.x = previousCell->vector.x;
@@ -242,6 +249,11 @@ void movedNorth(int currentlyFacing, Directions* neighbors)
 
 void movedSouth(int currentlyFacing, Directions* neighbors)
 {
+    if(previousCell->southWall == true)
+    {
+        printf("Cannot go here!\n");
+        return;
+    }
     currentCell = previousCell->southNeighbor;
     currentlyFacing = SOUTH;
     currentVector.x = previousCell->vector.x;
@@ -313,6 +325,11 @@ void movedSouth(int currentlyFacing, Directions* neighbors)
 void movedEast(int currentlyFacing, Directions* neighbors)
 {
 
+    if(previousCell->eastWall == true)
+    {
+        printf("Cannot go here!\n");
+        return;
+    }
     currentCell = previousCell->eastNeighbor;
     //currentCell = malloc(sizeof(Cell));
     currentlyFacing = EAST;
@@ -383,6 +400,11 @@ void movedEast(int currentlyFacing, Directions* neighbors)
 
 void movedWest(int currentlyFacing, Directions* neighbors)
 {
+    if(previousCell->westWall == true)
+    {
+        printf("Cannot go here!\n");
+        return;
+    }
     currentCell = previousCell->westNeighbor;
     currentlyFacing = WEST;
     currentVector.x = previousCell->vector.x - 1;
@@ -566,26 +588,18 @@ void destroyMaze(Cell *cellToDestroy)
 
 Set* init()
 {
-  // allocate space for the set
   Set *new_set = malloc(sizeof(Set));
   
-  // initially the set will be empty with no members, so set length to 0
   new_set->length = 0;
-
-  // allocate enough space to store 1 member, we'll expand this as needed
   new_set->members = malloc(sizeof(Coordinates));
-
-  // return the new Set (or more specifically, a pointer to it)
   return new_set;
 }
 
-// returns true if the Set is empty, and false otherwise
 bool is_empty(Set *set)
 {
   return (set->length == 0);
 }
 
-// returns true if value is a member of set, and false otherwise
 bool is_member(Set *set, Coordinates inputVector)
 {
   // if we can find the value in the set's members, it is in the set
@@ -604,26 +618,20 @@ bool is_member(Set *set, Coordinates inputVector)
   return false;
 }
 
-// inserts the member value into the set (if it is not already in the set!)
 void insert(Set *set, Coordinates inputVector)
 {
-    // allocate space to store the *new* amount of members in the set 
     set->members = realloc(set->members, sizeof(Coordinates) * (set->length + 1));
     
-    // put the member into the set at the next available index
     set->members[set->length].x = inputVector.x;
     set->members[set->length].y = inputVector.y;
     set->members[set->length].cellAddress = inputVector.cellAddress;
-    // increment the set length to acknowledge the new length of the set
+
     set->length = set->length + 1;
     
 }
 
-// for debugging purposes only
 void print_set(Set *set)
 {
-  // loop through the array of set values, print each of them out separated by 
-  // a comma, except the last element - instead output a newline afterwards
   for (int i = 0; i < set->length; i++)
   {
       if (i == (set->length - 1))
