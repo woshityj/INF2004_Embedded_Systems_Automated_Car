@@ -219,11 +219,23 @@ void encoder_driver_init()
     gpio_set_irq_enabled_with_callback(ECHO_PIN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &gpio_callback_isr); //enable interrupts by the echo pin
 }
 
+/*!
+*	@brief	            This function converts the distance in cm to the number of interrupts or 
+*                       slits on the wheel encoder that has to pass to travel the specified distance
+*   @param[in]  cm      Distance in cm to convert to the number of interrupts
+*	@return             Returns the total number of interrupts to travel the specified distance in cm
+*/
 int cm_to_interrupts(int cm)
 {
     return (cm / CM_PER_SLOT);
 }
 
+/*!
+*	@brief	            This function calculates the distance that the specified Wheel Encoder Sensor
+*                       
+*   @param[in]  gpio    Contains the GPIO number to identify which Encoder Sensor to get the distance for
+*	@return             Returns the distance in CM for the specified Wheel Encoder Sensor
+*/
 bool timer_callback_isr_alert(struct repeating_timer *t)
 {
     if (left_interrupts_isr_target_reached && right_interrupts_isr_target_reached)

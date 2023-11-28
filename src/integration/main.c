@@ -126,7 +126,11 @@ void ssi_init()
   http_set_ssi_handler(ssi_handler, ssi_tags, LWIP_ARRAYSIZE(ssi_tags));
 }
 
-// Moves forward by distance defined by the programmer
+/*!
+*	@brief	            This function moves the car forward at a specified distance in cm and speed
+*   @param[in]  cm      Distance the car should travel in cm
+*   @param[in]  speed   Speed in terms of km/h that the car would travel the distance via
+*/
 void move_forward_with_distance(int cm, int speed)
 {
     int no_of_interrupts = cm_to_interrupts(cm);
@@ -158,7 +162,11 @@ void move_forward_with_distance(int cm, int speed)
     return;
 }
 
-// Moves backwards by distance defined by the programmer
+/*!
+*	@brief	            This function moves the car backwards at a specified distance in cm and speed
+*   @param[in]  cm      Distance the car should travel in cm
+*   @param[in]  speed   Speed in terms of km/h that the car would travel the distance via
+*/
 void move_backward_with_distance(int cm, int speed)
 {
     int no_of_interrupts = cm_to_interrupts(cm);
@@ -192,6 +200,11 @@ void move_backward_with_distance(int cm, int speed)
     return;
 }
 
+/*!
+*	@brief	                        This function turns the car in a specific direction at a specificied angle 
+*   @param[in]  turn_direction      Direction for the car to turn in, Clockwise or Anti-Clockwise
+*   @param[in]  angle               Angle that the car would turn and stop at
+*/
 void spot_turn_pid(int turn_direction, int angle)
 {
     if (angle < MIN_TURN_ANGLE)
@@ -249,6 +262,12 @@ void spot_turn_pid(int turn_direction, int angle)
     printf("[Encoder] Successfully turned\n");
 }
 
+/*!
+*	@brief	                        This function turns the car in a specific direction at a specified number
+*                                   of interrupts based on the number of slits from the wheel encoder
+*   @param[in]  turn_direction      Direction for the car to turn in, Clockwise or Anti-Clockwise
+*   @param[in]  interrupts          Number of interrupts / slits from the wheel encoder before the car stops turning
+*/
 void spot_turn_pid_interrupts(int turn_direction, int interrupts)
 {
     if (MOTOR_TURN_CLOCKWISE == turn_direction)
@@ -285,6 +304,11 @@ void spot_turn_pid_interrupts(int turn_direction, int interrupts)
     printf("[Encoder] Successfully turned\n");
 }
 
+/*!
+*	@brief              This function performs the necessary action when a wall is detected from the
+*                       ultrasonic sensor, where the car would stop and move back half a grid's lengh
+*                       and turn in a clockwise direction for 90 degrees 
+*/
 void wall_detected_action()
 {
     PID_setpoint(state.left_motor_pid, 0);
@@ -292,31 +316,34 @@ void wall_detected_action()
     MOTOR_set_speed(0, MOTOR_LEFT);
     MOTOR_set_speed(0, MOTOR_RIGHT);
 
-    move_backward_with_distance(8, 10);
+    move_backward_with_distance((GRID_SIZE / 2), 10);
 
     vTaskDelay(pdMS_TO_TICKS(1000));
     spot_turn_pid(MOTOR_TURN_CLOCKWISE, 90);
 }
 
-void barcode_scanning_mode(State *state)
-{
-    // Remove backwards half a grid
-    move_backward_with_distance(GRID_SIZE / 2, 10, &state);
+// void barcode_scanning_mode(State *state)
+// {
+//     // Remove backwards half a grid
+//     move_backward_with_distance(GRID_SIZE / 2, 10, &state);
 
-    // Set to move forward at a constant low speed
-    PID_setpoint(&state->left_motor_pid, 5);
-    PID_setpoint(&state->right_motor_pid, 5);
+//     // Set to move forward at a constant low speed
+//     PID_setpoint(&state->left_motor_pid, 5);
+//     PID_setpoint(&state->right_motor_pid, 5);
 
-    // Initialize Front IR Sensor scan for barcode
-    IR_barcode_scan(&barcode_timer);
+//     // Initialize Front IR Sensor scan for barcode
+//     IR_barcode_scan(&barcode_timer);
 
-    return;
-}
+//     return;
+// }
 
 // Function is called when an object is detected
 //
 
-
+/*!
+*	@brief              This function helps maintain a consistent speed for both left and right
+*                       motors in terms of km/h using PID
+*/
 void pid_task(__unused void *params)
 {
     printf("[PID] Initializing PID in FreeRTOS");
@@ -343,6 +370,10 @@ void pid_task(__unused void *params)
     }
 }
 
+/*!
+*	@brief              This FreeRTOS tasks initializes the ultrasonic sensor and
+*                       constantly detects if there is an obstacle within 20cm
+*/
 void ultrasonic_task(__unused void *params)
 {
     printf("[Ultrasonic] Initializing Ultrasonic in FreeRTOS");
@@ -360,6 +391,12 @@ void ultrasonic_task(__unused void *params)
     }
 }
 
+/*!
+*	@brief              This FreeRTOS tasks initializes the wheel encoder and
+*                       constantly tracks the current speed of the car in terms of
+*                       km/h, which will be used by the PID function to maintain
+*                       the speed of the car at the desired or set speed
+*/
 void encoder_task(__unused void *params)
 {
     printf("[Encoder] Initializing Encoder in FreeRTOS");
@@ -375,7 +412,10 @@ void encoder_task(__unused void *params)
     }
 }
 
-
+/*!
+*	@brief              This FreeRTOS tasks contains the functions required for the car
+*                       to operate
+*/
 void main_task(__unused void *params)
 {
     printf("[Main Task] Initializing Main Task in FreeRTOS");
@@ -449,6 +489,13 @@ void main_task(__unused void *params)
     }
 }
 
+/*!
+*	@brief              This function makes use of the left and right IR sensors
+*                       to ensure that whenever a wall is detected on either the 
+*                       left or the right IR sensor, it will turn clockwise or
+*                       anti-clockwise respectively to ensure that the car
+*                       maintains within the confinement of the walls
+*/
 void left_right_ir_task(__unused void *params)
 {
     printf("[IR] Initializing Left and Right IR Sensors in FreeRTOS");
@@ -489,8 +536,10 @@ void left_right_ir_task(__unused void *params)
     }
 }
 
-// Function for Barcode Scanning Task with PID
-//
+/*!
+*	@brief              This function performs the barcode scanning task through the front
+*                       IR sensor and prints out the character
+*/
 void barcode_scanning_task()
 {
     printf("[IR] Initializing Barcode Scanning in FreeRTOS");
@@ -506,12 +555,14 @@ void barcode_scanning_task()
             barcode_char = temp_char;
         }
         
-        
-
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 
+/*!
+*	@brief              This function starts the webserver and prints out the barcode
+*                       character onto the web server
+*/
 void webserver_task(__unused void *params)
 {
     vTaskDelay(pdMS_TO_TICKS(10000));
