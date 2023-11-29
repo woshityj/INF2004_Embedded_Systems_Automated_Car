@@ -5,7 +5,8 @@
 #include "hardware/i2c.h"
 #include "magnetometer_driver.h"
 
-// function --------------------------------------------------------------
+
+// Function to set up the accelerometer
 void create_acc_setup() {
    uint8_t buffer[2] = {CTRL_REG_4, 0x00};
    
@@ -66,7 +67,8 @@ void create_mag_setup() {
    );
 }
 
-// function --------------------------------------------------------------
+
+// Function to read the accelerometer value
 void read_acc(accel_t *acc) {
    uint8_t buffer[6];
    int16_t accel[3];
@@ -98,7 +100,7 @@ void read_acc(accel_t *acc) {
    acc->z = accel[2];
 }
 
-// Function to read magnetometer data
+// Function to read magnetometer value
 void read_mag(mag_t *mag) {
    uint8_t buffer[6];
    int16_t magnet[3];
@@ -113,7 +115,7 @@ void read_mag(mag_t *mag) {
       true
    );
 
-   // Read magnetometer data
+   // Read magnetometer value
    i2c_read_blocking(
       i2c_default,
       INTERFACE_B,
@@ -133,7 +135,7 @@ void read_mag(mag_t *mag) {
    mag->z = magnet[2];
 }
 
-// Function to calculate the angle from magnetometer data
+// Function to calculate the angle from magnetometer values
 int32_t get_angle(mag_t *mag) {
    // Calculate angle in radians
    double angle_rad = atan2((double)mag->y, (double)mag->x);

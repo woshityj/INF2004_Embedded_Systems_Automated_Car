@@ -2,7 +2,7 @@
 #define __LSM303DLH__
 
 #include <stdint.h>
-#define INTERFACE_A 0x18 // Accelerometr slave address
+#define INTERFACE_A 0x18 // Accelerometer slave address
 #define INTERFACE_B 0x1E // Slave address for the magnetometer
 
 #define CTRL_REG_1 0x20 // Control register 1 address
@@ -14,9 +14,9 @@
 #define MAG_MR 0x02     // Mode register address for magnetometer
 
 typedef struct {
-   int16_t x;
-   int16_t y;
-   int16_t z;
+   int16_t x; // X-axis accelerometer data
+   int16_t y; // Y-axis accelerometer data
+   int16_t z; // Z-axis accelerometer data
 } accel_t;
 
 typedef struct {
