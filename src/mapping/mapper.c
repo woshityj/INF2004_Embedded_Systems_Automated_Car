@@ -1081,7 +1081,7 @@ void set_score(Cell *cell, Set *set, int score)
 
 Cell* lookAtScores(Cell *currentSource)
 {
-    int lowestScore = INT_MAX;
+    int lowestScore = 1000000;
     Cell *lowestAddress;
     if( (currentSource->northNeighbor != NULL) && ( (currentSource->northNeighbor->score) < lowestScore) )
     {
