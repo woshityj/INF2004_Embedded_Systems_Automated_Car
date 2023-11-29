@@ -66,6 +66,7 @@ Coordinates* getColsAndRows(Set *set);
 void destroySet(Set *set);
 
 /**********Mapper**********/
+void printMap();
 void assignWalls(Directions *dir, bool northWall, bool southWall, bool eastWall, bool westWall);
 void movedForward(int currentlyFacing, Directions* neighbors);
 void movedBackwards(int forwardFacing, Directions* neighbors);
@@ -80,5 +81,6 @@ void generateNeighborCellsForEast(Cell *currentCell);
 void generateNeighborCellsForWest(Cell *currentCell);
 Cell** getMap(struct Set *set);
 void destroyMaze(Cell *cellToDestroy);
+
 
 #endif

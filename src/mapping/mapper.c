@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#include <string.h>
 //#include "../infrared/infrared.h"
 
 #include "mapper.h"
@@ -20,6 +21,51 @@ int main(void)
 {
     printf("Hello world\n");
     Directions* dir = (Directions*)malloc(sizeof(Directions));
+
+		// Smaller maze start
+		// assignWalls(dir, true, false, false, true);
+		// currentCell = initMaze(dir);
+
+		// currentlyFacing = EAST;
+    // assignWalls(dir, false, true, EAST_WALL, false);
+    // movedForward(currentlyFacing, dir);
+
+		// currentlyFacing = NORTH;
+    // assignWalls(dir, true, false, EAST_WALL, false);
+    // movedForward(currentlyFacing, dir);
+
+		// currentlyFacing = WEST;
+    // assignWalls(dir, true, true, false, false);
+    // movedForward(currentlyFacing, dir);
+
+    // assignWalls(dir, false, false, false, true);
+    // movedForward(currentlyFacing, dir);
+
+		// currentlyFacing = SOUTH;
+    // assignWalls(dir, false, true, true, true);
+    // movedForward(currentlyFacing, dir);
+
+		// currentlyFacing = NORTH;
+		// movedForward(currentlyFacing, dir);
+
+		// assignWalls(dir, true, false, false, true);
+    // movedForward(currentlyFacing, dir);
+
+		// currentlyFacing = EAST;
+    // assignWalls(dir, false, true, false, false);
+    // movedForward(currentlyFacing, dir);
+
+    // assignWalls(dir, true, true, true, false);
+    // movedForward(currentlyFacing, dir);
+
+		// currentlyFacing = WEST;
+    // movedForward(currentlyFacing, dir);
+
+		//Smaller maze end
+
+
+		// Final maze start 
+
     assignWalls(dir, false, false, false, false);
     currentCell = initMaze(dir);
 
@@ -66,8 +112,8 @@ int main(void)
     assignWalls(dir, false, false, EAST_WALL, WEST_WALL);
     movedForward(currentlyFacing, dir);
 
-    movedForward(currentlyFacing, dir);
     assignWalls(dir, false, false, EAST_WALL, false);
+    movedForward(currentlyFacing, dir);
 
     currentlyFacing = WEST;
     assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, false);
@@ -133,8 +179,9 @@ int main(void)
     currentlyFacing = WEST;
     movedForward(currentlyFacing, dir);
 
-    assignWalls(dir, false, false, false, false);
+    assignWalls(dir, true, false, false, false);
     movedForward(currentlyFacing, dir);
+
 
     currentlyFacing = SOUTH;
     assignWalls(dir, false, SOUTH_WALL, EAST_WALL, WEST_WALL);
@@ -150,7 +197,16 @@ int main(void)
     currentlyFacing = EAST;
     movedForward(currentlyFacing, dir);
 
-    Coordinates *rowsAndCols = getColsAndRows(allVectorSets);
+		Cell *endingCell = endOfMaze.genesisCell;
+		endingCell->northWall = false;
+
+		// Final maze end
+
+		printMap();
+}
+
+void printMap(){
+	Coordinates *rowsAndCols = getColsAndRows(allVectorSets);
     Coordinates dimensions = rowsAndCols[0];
     Coordinates lowestValues = rowsAndCols[1];
     int rows = dimensions.y;
@@ -161,6 +217,15 @@ int main(void)
     printf("Lowest x value: %d, Lowest y value: %d\n", lowestX, lowestY);
     Cell **maze = getMap(allVectorSets);
     Cell mazeCell;
+
+		char line1[200];
+		char line2[200];
+		char final[2000];
+
+		strcpy(line1, " _ ");
+		strcpy(line2, "|_ ");
+		strcpy(final, "");
+		
     // This for loop represents the map from top left to bottom right as a 2D grid
     for(int i = rows - 1; i >= 0; i--)
     {
@@ -169,16 +234,145 @@ int main(void)
         mazeCell = maze[i][j];
         if(mazeCell.origin == true)
         {
-          printf("Hello I am the entrance\n");
+          // printf("Hello I am the entrance\n");
+					strcat(line2, "  ");
+					// printf("coordinates of cell: %d,%d\n", mazeCell.vector.x, mazeCell.vector.y);
+          // printf("North wall: %d\n", mazeCell.northWall);
+          // printf("South wall: %d\n", mazeCell.southWall);
+          // printf("East wall: %d\n", mazeCell.eastWall);
+          // printf("West wall: %d\n", mazeCell.westWall);
+					// printf("how i look like on the map:\n");
+					// printf("%s\n", line2);
         }
-        else if(mazeCell.origin == false && mazeCell.vector.cellAddress != NULL)
-        {
-          printf("I am just a random cell\n");
+        if(mazeCell.origin == false && mazeCell.vector.cellAddress != NULL)
+        {	
+          if (mazeCell.vector.y == (rows - 1) && mazeCell.vector.x == lowestX){
+						if (mazeCell.northWall){
+							strcpy(line1, " _ ");
+						}
+						else{
+							strcpy(line1, "   ");
+						}
+
+						if (mazeCell.southWall && mazeCell.westWall && mazeCell.eastWall){
+								strcpy(line2, "|_|");
+							}
+						else if (mazeCell.southWall && mazeCell.eastWall){
+								strcpy(line2, " _|");
+							}
+						else if (mazeCell.southWall && mazeCell.westWall){
+								strcpy(line2, "|_ ");
+							}
+						else if (mazeCell.westWall && mazeCell.eastWall){
+								strcpy(line2, "| |");
+							}
+						else if (mazeCell.eastWall){
+								strcpy(line2, "  |");
+							}
+						else if (mazeCell.westWall){
+								strcpy(line2, "|  ");
+							}
+						else if (mazeCell.southWall){
+								strcpy(line2, " _ ");
+							}
+							else{
+								strcpy(line2, "   ");
+							}
+          }
+
+					else if (mazeCell.vector.y == (rows - 1)){
+						if (mazeCell.northWall){
+              strcat(line1, "_ ");
+            }
+            else{
+              strcat(line1, "  ");
+            }
+
+            if (mazeCell.southWall && mazeCell.eastWall){
+              strcat(line2, "_|");
+            }
+            else if (mazeCell.southWall){
+              strcat(line2, "_ ");
+            }
+            else if (mazeCell.eastWall){
+              strcat(line2, " |");
+            }
+            else{
+              strcat(line2, "  ");
+            }
+					}
+
+
+					else if (mazeCell.vector.x == lowestX){
+						if (mazeCell.southWall && mazeCell.eastWall && mazeCell.westWall){
+              strcat(line2, "|_|");
+            }
+            else if (mazeCell.southWall && mazeCell.eastWall){
+              strcat(line2, " _|");
+            }
+            else if (mazeCell.southWall && mazeCell.westWall){
+              strcat(line2, "|_ ");
+            }
+						else if (mazeCell.eastWall && mazeCell.westWall){
+							strcat(line2, "| |");
+						}
+            else if (mazeCell.southWall){
+              strcat(line2, " _ ");
+            }
+            else if (mazeCell.eastWall){
+              strcat(line2, "  |");
+            }
+            else if (mazeCell.westWall){
+              strcat(line2, "|  ");
+            }
+            else{
+              strcat(line2, "   ");
+            }
+					}
+
+					else {
+            if (mazeCell.southWall && mazeCell.eastWall){
+              strcat(line2, "_|");
+            }
+            else if (mazeCell.southWall){
+              strcat(line2, "_ ");
+            }
+            else if (mazeCell.eastWall){
+              strcat(line2, " |");
+            }
+            else{
+              strcat(line2, "  ");
+            }
+          }
+
+          // printf("coordinates of cell: %d,%d\n", mazeCell.vector.x, mazeCell.vector.y);
+          // printf("North wall: %d\n", mazeCell.northWall);
+          // printf("South wall: %d\n", mazeCell.southWall);
+          // printf("East wall: %d\n", mazeCell.eastWall);
+          // printf("West wall: %d\n", mazeCell.westWall);
+					// printf("how i look like on the map:\n");
+					// printf("%s\n", line1);
+					// printf("%s\n", line2);
+          // printf("I am just a random cell\n");
         }
+				
       }
+			if (i == rows-1){
+			strcat(final, line1);
+      strcat(final, "\n");	
+			}
+
+			strcat(final, line2);
+			strcat(final, "\n");
+
+			strcpy(line1, "");
+			strcpy(line2, "");
+
     }
+		printf("%s", final);
     print_set(allVectorSets);
 }
+
 // The only 2 functions that the movement logic needs to call everytime it does something
 void movedForward(int currentlyFacing, Directions* neighbors)
 {
@@ -200,6 +394,10 @@ void movedForward(int currentlyFacing, Directions* neighbors)
   }
   printf("moved forward, facing %d\n", currentlyFacing);
   printf("Now at coord x:%d, y:%d\n", currentVector.x, currentVector.y);
+	if(currentVector.x == -1 && currentVector.y == 5)
+  {
+    endOfMaze.genesisCell = currentCell;
+  }
 }
 
 // Only works if the maze is already mapped, otherwise will break
