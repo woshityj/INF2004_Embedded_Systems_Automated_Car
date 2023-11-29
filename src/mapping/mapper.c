@@ -22,44 +22,45 @@ int main(void)
     Directions* dir = (Directions*)malloc(sizeof(Directions));
 
 		// Smaller maze start
-		// assignWalls(dir, true, false, false, true);
-		// currentCell = initMaze(dir);
+    // Smaller maze start
+    // assignWalls(dir, NORTH_WALL, false, false, WEST_WALL);
+    // currentCell = initMaze(dir);
 
-		// currentlyFacing = EAST;
-    // assignWalls(dir, false, true, EAST_WALL, false);
+    // currentlyFacing = EAST;
+    // assignWalls(dir, false, SOUTH_WALL, EAST_WALL, false);
     // movedForward(currentlyFacing, dir);
 
-		// currentlyFacing = NORTH;
-    // assignWalls(dir, true, false, EAST_WALL, false);
+    // currentlyFacing = NORTH;
+    // assignWalls(dir, NORTH_WALL, false, EAST_WALL, false);
     // movedForward(currentlyFacing, dir);
 
-		// currentlyFacing = WEST;
-    // assignWalls(dir, true, true, false, false);
+    // currentlyFacing = WEST;
+    // assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, false);
     // movedForward(currentlyFacing, dir);
 
-    // assignWalls(dir, false, false, false, true);
+    // assignWalls(dir, false, false, false, WEST_WALL);
     // movedForward(currentlyFacing, dir);
 
-		// currentlyFacing = SOUTH;
-    // assignWalls(dir, false, true, true, true);
+    // currentlyFacing = SOUTH;
+    // assignWalls(dir, false, SOUTH_WALL, EAST_WALL, WEST_WALL);
     // movedForward(currentlyFacing, dir);
 
-		// currentlyFacing = NORTH;
-		// movedForward(currentlyFacing, dir);
-
-		// assignWalls(dir, true, false, false, true);
+    // currentlyFacing = NORTH;
     // movedForward(currentlyFacing, dir);
 
-		// currentlyFacing = EAST;
-    // assignWalls(dir, false, true, false, false);
+    // assignWalls(dir, NORTH_WALL, false, false, WEST_WALL);
     // movedForward(currentlyFacing, dir);
 
-    // assignWalls(dir, true, true, true, false);
+    // currentlyFacing = EAST;
+    // assignWalls(dir, false, SOUTH_WALL, false, false);
     // movedForward(currentlyFacing, dir);
 
-		// currentlyFacing = WEST;
+    // assignWalls(dir, NORTH_WALL, SOUTH_WALL, WEST_WALL, false);
     // movedForward(currentlyFacing, dir);
 
+    // currentlyFacing = WEST;
+    // movedForward(currentlyFacing, dir);
+    // Cell* endingCell = endOfMaze.genesisCell;
 		//Smaller maze end
 
 
@@ -200,7 +201,7 @@ int main(void)
 		Cell *endingCell = endOfMaze.genesisCell;
 		endingCell->northWall = false;
     endingCell->ending = true;
-		// Final maze end
+		// // Final maze end
 
     print_set(allVectorSets);
 		printMap();
@@ -415,6 +416,13 @@ void movedForward(int currentlyFacing, Directions* neighbors)
   {
     endOfMaze.genesisCell = currentCell;
   }
+  //if(currentVector.x == 0 && currentVector.y == 2)
+  //{
+  //  endOfMaze.genesisCell = currentCell;
+  //  currentCell->ending = true;
+  //  free(currentCell->northNeighbor);
+  //  currentCell->northNeighbor = NULL;
+  //}
 }
 
 // Only works if the maze is already mapped, otherwise will break
