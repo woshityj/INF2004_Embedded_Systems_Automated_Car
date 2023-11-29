@@ -98,6 +98,9 @@ Cell** getMap(struct Set *set);
 void destroyMaze(Cell *cellToDestroy);
 
 
-void floodfill(qHead *queue, Cell *endSource, Set *visited, int score);
-void enque(qHead *queue, Cell *cell, Set *set, int score);
+void floodfill(Cell *endSource, Set *visited, int score);
+void set_score(Cell *cell, Set *set, int score);
+void shortestPath(Cell *startSource, Cell *endSource);
+Cell* lookAtScores(Cell *currentSource);
+
 #endif

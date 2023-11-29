@@ -196,23 +196,22 @@ int main(void)
     currentlyFacing = EAST;
     movedForward(currentlyFacing, dir);
 
+    // Had to hard code change this portion because the logic in the maze formation compared to IR data is different
 		Cell *endingCell = endOfMaze.genesisCell;
 		endingCell->northWall = false;
-
+    endingCell->ending = true;
 		// Final maze end
 
     print_set(allVectorSets);
 		printMap();
 
 
-    //Set *visitedSet = init();
-    //Cell *endSource = endOfMaze.genesisCell;
-    //qHead *queue = malloc(sizeof(qHead));
-    //queue->end = malloc(sizeof(node*));
-    //queue->front = malloc(sizeof(node*));
-    //queue->end = NULL;
-    //queue->front = NULL;
-    //floodfill(queue, endSource, visitedSet, 0);
+    Set *visitedSet = init();
+    Cell *endSource = endingCell;
+
+    floodfill(endSource, visitedSet, 0);
+    printf("\n");
+    shortestPath(startOfMaze.genesisCell, endOfMaze.genesisCell);
 }
 
 void printMap(){
@@ -1037,63 +1036,81 @@ void destroySet(Set *set)
     }
 }
 
-void floodfill(qHead *queue, Cell *endSource, Set *visited, int score)
-{   
-    int size = visited->length;
-    if(size == allVectorSets->length) // visited every cell, stop the recursion
+void floodfill(Cell *endSource, Set *visited, int score)
+{
+    if (endSource == NULL || is_member(visited, endSource->vector))
     {
         return;
     }
-    if(endSource == NULL)
-    {
-        return;
-    }
-    // Create a queue for BFS
 
+    set_score(endSource, visited, score);
+    insert(visited, endSource->vector);
 
-    enque(queue, endSource, visited, score); // add itself to the queue
-
-    // add all the neighbors to the queue
-    //enque(queue, endSource->northNeighbor, visited, score + 1);
-    //enque(queue, endSource->southNeighbor, visited, score + 1);
-    //enque(queue, endSource->eastNeighbor, visited, score + 1);
-    //enque(queue, endSource->westNeighbor, visited, score + 1);
-
-    floodfill(queue, endSource->northNeighbor, visited, score + 1);
-    floodfill(queue, endSource->southNeighbor, visited, score + 1);
-    floodfill(queue, endSource->eastNeighbor, visited, score + 1);
-    floodfill(queue, endSource->westNeighbor, visited, score + 1);
-    
+    floodfill(endSource->northNeighbor, visited, score + 1);
+    floodfill(endSource->southNeighbor, visited, score + 1);
+    floodfill(endSource->eastNeighbor, visited, score + 1);
+    floodfill(endSource->westNeighbor, visited, score + 1);
 }
 
-void enque(qHead *queue, Cell *cell, Set *set, int score)
+
+void set_score(Cell *cell, Set *set, int score)
 {
     if(cell == NULL)
     {
         return;
     }
     Coordinates thisVector = cell->vector;
-    if(is_member(set, thisVector)) // if visited dont enque
+    if(is_member(set, thisVector)) // if visited dont bother
     {
         return;
     }
     insert(set, thisVector); // mark as visited
-    printf("Inserted x:%d, y: %d into the queue\n", cell->vector.x, cell->vector.y);
-    node *newNode = malloc(sizeof(node));
-    newNode->cellAddress = cell;
-    newNode->infront = NULL;
-    newNode->behind = NULL;
-    newNode->scoreToSet = score;
+    printf("Inserted x:%d, y: %d into the queue, the score for this is at %d\n", cell->vector.x, cell->vector.y, score);
 
-    if (queue->end == NULL) // empty queue
+    cell->score = score;
+
+}
+
+Cell* lookAtScores(Cell *currentSource)
+{
+    int lowestScore = INT_MAX;
+    Cell *lowestAddress;
+    if( (currentSource->northNeighbor != NULL) && ( (currentSource->northNeighbor->score) < lowestScore) )
     {
-        queue->end = newNode;
-        queue->front = newNode;
-        return;
+        lowestScore = currentSource->northNeighbor->score;
+        lowestAddress = currentSource->northNeighbor;
     }
 
-    // if queue isn't empty
-    newNode->behind = queue->end;
-    queue->end->infront = newNode;
-    queue->end = newNode;
+    if( (currentSource->southNeighbor != NULL) && ( (currentSource->southNeighbor->score) < lowestScore) )
+    {
+        lowestScore = currentSource->southNeighbor->score;
+        lowestAddress = currentSource->southNeighbor;
+    }
+
+    if( (currentSource->eastNeighbor != NULL) && ( (currentSource->eastNeighbor->score) < lowestScore) )
+    {
+        lowestScore = currentSource->eastNeighbor->score;
+        lowestAddress = currentSource->eastNeighbor;
+    }
+
+    if( (currentSource->westNeighbor != NULL) && ( (currentSource->westNeighbor->score) < lowestScore) )
+    {
+        lowestScore = currentSource->westNeighbor->score;
+        lowestAddress = currentSource->westNeighbor;
+    }
+
+    return lowestAddress;
+}
+void shortestPath(Cell *startSource, Cell *endSource)
+{
+    printf("Starting at (%d,%d)!\n", startSource->vector.x, startSource->vector.y);
+    int i = 1;
+    while(startSource != endSource)
+    {
+        Cell *moveTo = lookAtScores(startSource);
+        printf("Step %d) Move to (%d,%d)\n", i, moveTo->vector.x, moveTo->vector.y);
+        i++;
+        startSource = moveTo;
+    }
+    printf("Shortest path found!\n");
 }
