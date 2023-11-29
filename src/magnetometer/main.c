@@ -74,8 +74,6 @@ void get_readings() {
 
        printf("Mag. X =%4d Y =%4d, Z =%4d, Orientation: %s , Acc. X = %4d Y = %4d, Z = %4d \n",
               mag.x, mag.y, mag.z, orientation, acc.x,acc.y,acc.z);
-    //    printf("Relative Degree: %4d, True Degree: %4d, Orientation: %s\n",
-    //           used_angle, angle, orientation);
        sleep_ms(REFRESH_PERIOD);
    }
 }
