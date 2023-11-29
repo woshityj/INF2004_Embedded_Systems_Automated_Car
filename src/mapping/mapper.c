@@ -4,7 +4,6 @@
 #include <math.h>
 #include <string.h>
 //#include "../infrared/infrared.h"
-
 #include "mapper.h"
 //#include "set.h"
 
@@ -19,7 +18,7 @@ volatile int currentlyFacing = NORTH; // always assumes it starts off facing "no
 
 int main(void)
 {
-    printf("Hello world\n");
+    // printf("Hello world\n");
     Directions* dir = (Directions*)malloc(sizeof(Directions));
 
 		// Smaller maze start
@@ -202,7 +201,18 @@ int main(void)
 
 		// Final maze end
 
+    print_set(allVectorSets);
 		printMap();
+
+
+    //Set *visitedSet = init();
+    //Cell *endSource = endOfMaze.genesisCell;
+    //qHead *queue = malloc(sizeof(qHead));
+    //queue->end = malloc(sizeof(node*));
+    //queue->front = malloc(sizeof(node*));
+    //queue->end = NULL;
+    //queue->front = NULL;
+    //floodfill(queue, endSource, visitedSet, 0);
 }
 
 void printMap(){
@@ -213,8 +223,8 @@ void printMap(){
     int cols = dimensions.x;
     int lowestX = lowestValues.x;
     int lowestY = lowestValues.y;
-    printf("Rows: %d, Cols: %d\n", rows, cols);
-    printf("Lowest x value: %d, Lowest y value: %d\n", lowestX, lowestY);
+    // printf("Rows: %d, Cols: %d\n", rows, cols);
+    // printf("Lowest x value: %d, Lowest y value: %d\n", lowestX, lowestY);
     Cell **maze = getMap(allVectorSets);
     Cell mazeCell;
 
@@ -231,6 +241,14 @@ void printMap(){
     {
       for(int j = 0; j < cols; j++)
       {
+        //mazeCell = maze[i][j];
+        for(int k = 0; k < cols; k++)
+        {
+            if(k == 0 && i == rows -1) //most top left maze cell
+            {
+                
+            }
+        }
         mazeCell = maze[i][j];
         if(mazeCell.origin == true)
         {
@@ -370,7 +388,7 @@ void printMap(){
 
     }
 		printf("%s", final);
-    print_set(allVectorSets);
+
 }
 
 // The only 2 functions that the movement logic needs to call everytime it does something
@@ -392,8 +410,8 @@ void movedForward(int currentlyFacing, Directions* neighbors)
   {
       movedWest(currentlyFacing, neighbors);
   }
-  printf("moved forward, facing %d\n", currentlyFacing);
-  printf("Now at coord x:%d, y:%d\n", currentVector.x, currentVector.y);
+  // printf("moved forward, facing %d\n", currentlyFacing);
+  // printf("Now at coord x:%d, y:%d\n", currentVector.x, currentVector.y);
 	if(currentVector.x == -1 && currentVector.y == 5)
   {
     endOfMaze.genesisCell = currentCell;
@@ -463,6 +481,8 @@ Cell *initMaze(Directions* neighbors)
     currentCell->vector.x = currentVector.x;
     currentCell->vector.y = currentVector.y;
 
+    currentCell->score = -1;
+
     // For each of the directions, if there is a wall, just reclaim the memory there
     if(currentCell->northWall)
     {
@@ -509,7 +529,7 @@ void movedNorth(int currentlyFacing, Directions* neighbors)
         currentCell->vector.x = currentVector.x;
         currentCell->vector.y = currentVector.y;
         currentCell->vector.cellAddress = currentCell;
-
+        currentCell->score = -1;
         // The neighbors are all assumed to be moveable until proven otherwise
 
         // Query about its neighboring cells wall status
@@ -583,7 +603,7 @@ void movedSouth(int currentlyFacing, Directions* neighbors)
         currentCell->vector.x = currentVector.x;
         currentCell->vector.y = currentVector.y;
         currentCell->vector.cellAddress = currentCell;
-
+        currentCell->score = -1;
         // The neighbors are all assumed to be moveable until proven otherwise
 
         // Query about its neighboring cells wall status
@@ -661,7 +681,7 @@ void movedEast(int currentlyFacing, Directions* neighbors)
         currentCell->vector.x = currentVector.x;
         currentCell->vector.y = currentVector.y;
         currentCell->vector.cellAddress = currentCell;
-
+        currentCell->score = -1;
         // The neighbors are all assumed to be moveable until proven otherwise
 
         // Query about its neighboring cells wall status
@@ -735,7 +755,7 @@ void movedWest(int currentlyFacing, Directions* neighbors)
         currentCell->vector.x = currentVector.x;
         currentCell->vector.y = currentVector.y;
         currentCell->vector.cellAddress = currentCell;
-
+        currentCell->score = -1;
         // The neighbors are all assumed to be moveable until proven otherwise
 
         // Query about its neighboring cells wall status
@@ -1015,4 +1035,65 @@ void destroySet(Set *set)
         }
         free(set);
     }
+}
+
+void floodfill(qHead *queue, Cell *endSource, Set *visited, int score)
+{   
+    int size = visited->length;
+    if(size == allVectorSets->length) // visited every cell, stop the recursion
+    {
+        return;
+    }
+    if(endSource == NULL)
+    {
+        return;
+    }
+    // Create a queue for BFS
+
+
+    enque(queue, endSource, visited, score); // add itself to the queue
+
+    // add all the neighbors to the queue
+    //enque(queue, endSource->northNeighbor, visited, score + 1);
+    //enque(queue, endSource->southNeighbor, visited, score + 1);
+    //enque(queue, endSource->eastNeighbor, visited, score + 1);
+    //enque(queue, endSource->westNeighbor, visited, score + 1);
+
+    floodfill(queue, endSource->northNeighbor, visited, score + 1);
+    floodfill(queue, endSource->southNeighbor, visited, score + 1);
+    floodfill(queue, endSource->eastNeighbor, visited, score + 1);
+    floodfill(queue, endSource->westNeighbor, visited, score + 1);
+    
+}
+
+void enque(qHead *queue, Cell *cell, Set *set, int score)
+{
+    if(cell == NULL)
+    {
+        return;
+    }
+    Coordinates thisVector = cell->vector;
+    if(is_member(set, thisVector)) // if visited dont enque
+    {
+        return;
+    }
+    insert(set, thisVector); // mark as visited
+    printf("Inserted x:%d, y: %d into the queue\n", cell->vector.x, cell->vector.y);
+    node *newNode = malloc(sizeof(node));
+    newNode->cellAddress = cell;
+    newNode->infront = NULL;
+    newNode->behind = NULL;
+    newNode->scoreToSet = score;
+
+    if (queue->end == NULL) // empty queue
+    {
+        queue->end = newNode;
+        queue->front = newNode;
+        return;
+    }
+
+    // if queue isn't empty
+    newNode->behind = queue->end;
+    queue->end->infront = newNode;
+    queue->end = newNode;
 }

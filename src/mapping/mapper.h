@@ -6,7 +6,7 @@
 #define EAST 0x3
 #define WEST 0x4
 #define DIFFERENCE(a, b) (a<b ? (b-a) : (a-b))
-
+#define BUFFER_SIZE 32768
 #define NORTH_WALL true
 #define SOUTH_WALL true
 #define EAST_WALL true
@@ -35,11 +35,26 @@ typedef struct Cell{
 
     struct Coordinates vector;
 
+    int score;
 } Cell;
 
 typedef struct Head{
     struct Cell *genesisCell;
 } Head;
+
+typedef struct node
+{
+    struct Cell *cellAddress;
+    struct node *infront;
+    struct node *behind;
+    int scoreToSet;
+} node;
+
+typedef struct qHead
+{
+    struct node *end;
+    struct node *front;
+} qHead;
 
 typedef struct {
     int currentlyFacing;
@@ -83,4 +98,6 @@ Cell** getMap(struct Set *set);
 void destroyMaze(Cell *cellToDestroy);
 
 
+void floodfill(qHead *queue, Cell *endSource, Set *visited, int score);
+void enque(qHead *queue, Cell *cell, Set *set, int score);
 #endif
