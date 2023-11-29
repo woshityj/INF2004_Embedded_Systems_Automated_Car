@@ -5,6 +5,10 @@
 // SSI tags - tag length limited to 8 bytes by default
 const char * ssi_tags[] = {"volt","temp","led"};
 
+/*!
+*	@brief      This function provides the various information
+*             that will be included in the html view file
+*/
 u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen) {
   size_t printed;
   switch (iIndex) {
@@ -40,6 +44,11 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen) {
   return (u16_t)printed;
 }
 
+/*!
+*	@brief      This function initializes the SSI handler
+*             to provide the respective information
+*				      to client connected
+*/
 // Initialise the SSI handler
 void ssi_init() {
   // Initialise ADC (internal pin)

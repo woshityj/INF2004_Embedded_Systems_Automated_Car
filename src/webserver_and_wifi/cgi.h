@@ -1,7 +1,11 @@
 #include "lwip/apps/httpd.h"
 #include "pico/cyw43_arch.h"
 
-// CGI handler which is run when a request for /led.cgi is detected
+/*!
+*	@brief      CGI Handler that is ran when a specific request
+*               from the client is detected, in this case it is the
+*               /led.cgi that toggles the pico leds on/off
+*/
 const char * cgi_led_handler(int iIndex, int iNumParams, char *pcParam[], char *pcValue[])
 {
     // Check if an request for LED has been made (/led.cgi?led=x)
@@ -18,7 +22,7 @@ const char * cgi_led_handler(int iIndex, int iNumParams, char *pcParam[], char *
 }
 
 // tCGI Struct
-// Fill this with all of the CGI requests and their respective handlers
+// Struct containing all of the CGI requests and their respective handlers functions
 static const tCGI cgi_handlers[] = {
     {
         // Html request for "/led.cgi" triggers cgi_handler
@@ -26,6 +30,10 @@ static const tCGI cgi_handlers[] = {
     },
 };
 
+/*!
+*	@brief      This function initializes all CGI Handlers
+*               based on the struct containing all the CGI requests
+*/
 void cgi_init(void)
 {
     http_set_cgi_handlers(cgi_handlers, 1);
