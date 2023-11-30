@@ -18,54 +18,83 @@ volatile int currentlyFacing = NORTH; // always assumes it starts off facing "no
 
 int main(void)
 {
-    // printf("Hello world\n");
     Directions* dir = (Directions*)malloc(sizeof(Directions));
 
 		// Smaller maze start
-    // Smaller maze start
-    // assignWalls(dir, NORTH_WALL, false, false, WEST_WALL);
-    // currentCell = initMaze(dir);
 
-    // currentlyFacing = EAST;
-    // assignWalls(dir, false, SOUTH_WALL, EAST_WALL, false);
-    // movedForward(currentlyFacing, dir);
-
-    // currentlyFacing = NORTH;
-    // assignWalls(dir, NORTH_WALL, false, EAST_WALL, false);
-    // movedForward(currentlyFacing, dir);
-
-    // currentlyFacing = WEST;
-    // assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, false);
-    // movedForward(currentlyFacing, dir);
-
-    // assignWalls(dir, false, false, false, WEST_WALL);
-    // movedForward(currentlyFacing, dir);
-
-    // currentlyFacing = SOUTH;
-    // assignWalls(dir, false, SOUTH_WALL, EAST_WALL, WEST_WALL);
-    // movedForward(currentlyFacing, dir);
-
-    // currentlyFacing = NORTH;
-    // movedForward(currentlyFacing, dir);
-
-    // assignWalls(dir, NORTH_WALL, false, false, WEST_WALL);
-    // movedForward(currentlyFacing, dir);
-
-    // currentlyFacing = EAST;
-    // assignWalls(dir, false, SOUTH_WALL, false, false);
-    // movedForward(currentlyFacing, dir);
-
-    // assignWalls(dir, NORTH_WALL, SOUTH_WALL, WEST_WALL, false);
-    // movedForward(currentlyFacing, dir);
-
-    // currentlyFacing = WEST;
-    // movedForward(currentlyFacing, dir);
-    // Cell* endingCell = endOfMaze.genesisCell;
+    //smallMaze(dir);
+    
 		//Smaller maze end
 
-
 		// Final maze start 
+    finalMaze(dir);
+    // Final maze end
 
+    // Had to hard code change this portion because the logic in the maze formation compared to IR data is different
+		Cell *endingCell = endOfMaze.genesisCell;
+		endingCell->northWall = false;
+    endingCell->ending = true;
+    // print_set(allVectorSets);
+		printMap();
+
+    // For floodfill score assignment
+    Set *visitedSet = init();
+    Cell *endSource = endingCell;
+
+    floodfill(endSource, visitedSet, 0);
+    printf("\n");
+    shortestPath(startOfMaze.genesisCell, endOfMaze.genesisCell);
+    free(dir);
+    free(visitedSet);
+    free(allVectorSets);
+    destroyMaze(startOfMaze.genesisCell);
+
+}
+
+void smallMaze(Directions *dir)
+{
+    assignWalls(dir, NORTH_WALL, false, false, WEST_WALL);
+    currentCell = initMaze(dir);
+
+    currentlyFacing = EAST;
+    assignWalls(dir, false, SOUTH_WALL, EAST_WALL, false);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = NORTH;
+    assignWalls(dir, NORTH_WALL, false, EAST_WALL, false);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = WEST;
+    assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, false);
+    movedForward(currentlyFacing, dir);
+
+    assignWalls(dir, false, false, false, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = SOUTH;
+    assignWalls(dir, false, SOUTH_WALL, EAST_WALL, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = NORTH;
+    movedForward(currentlyFacing, dir);
+
+    assignWalls(dir, NORTH_WALL, false, false, WEST_WALL);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = EAST;
+    assignWalls(dir, NORTH_WALL, SOUTH_WALL, false, false);
+    movedForward(currentlyFacing, dir);
+    endOfMaze.genesisCell = currentCell;
+
+    assignWalls(dir, NORTH_WALL, SOUTH_WALL, WEST_WALL, false);
+    movedForward(currentlyFacing, dir);
+
+    currentlyFacing = WEST;
+    movedForward(currentlyFacing, dir);
+}
+
+void finalMaze(Directions *dir)
+{
     assignWalls(dir, false, false, false, false);
     currentCell = initMaze(dir);
 
@@ -181,7 +210,7 @@ int main(void)
 
     assignWalls(dir, true, false, false, false);
     movedForward(currentlyFacing, dir);
-
+    endOfMaze.genesisCell = currentCell;
 
     currentlyFacing = SOUTH;
     assignWalls(dir, false, SOUTH_WALL, EAST_WALL, WEST_WALL);
@@ -196,26 +225,10 @@ int main(void)
 
     currentlyFacing = EAST;
     movedForward(currentlyFacing, dir);
-
-    // Had to hard code change this portion because the logic in the maze formation compared to IR data is different
-		Cell *endingCell = endOfMaze.genesisCell;
-		endingCell->northWall = false;
-    endingCell->ending = true;
-		// // Final maze end
-
-    print_set(allVectorSets);
-		printMap();
-
-
-    Set *visitedSet = init();
-    Cell *endSource = endingCell;
-
-    floodfill(endSource, visitedSet, 0);
-    printf("\n");
-    shortestPath(startOfMaze.genesisCell, endOfMaze.genesisCell);
 }
 
-void printMap(){
+void printMap()
+{
 	Coordinates *rowsAndCols = getColsAndRows(allVectorSets);
     Coordinates dimensions = rowsAndCols[0];
     Coordinates lowestValues = rowsAndCols[1];
@@ -412,12 +425,7 @@ void movedForward(int currentlyFacing, Directions* neighbors)
   }
   // printf("moved forward, facing %d\n", currentlyFacing);
   // printf("Now at coord x:%d, y:%d\n", currentVector.x, currentVector.y);
-	if(currentVector.x == -1 && currentVector.y == 5)
-  {
-    endOfMaze.genesisCell = currentCell;
-  }
-  //if(currentVector.x == 0 && currentVector.y == 2)
-  //{
+
   //  endOfMaze.genesisCell = currentCell;
   //  currentCell->ending = true;
   //  free(currentCell->northNeighbor);
@@ -428,21 +436,26 @@ void movedForward(int currentlyFacing, Directions* neighbors)
 // Only works if the maze is already mapped, otherwise will break
 void movedBackwards(int forwardFacing, Directions* neighbors)
 {
-    switch(currentlyFacing)
+    if(currentlyFacing == NORTH)
     {
-        case NORTH:
-            movedSouth(forwardFacing, neighbors);
-            // Set the currentlyFacing back to where it was actually at since it's moving backwards
-            currentlyFacing = NORTH;
-        case SOUTH:
-            movedNorth(forwardFacing, neighbors);
-            currentlyFacing = SOUTH;
-        case EAST:
-            movedWest(forwardFacing, neighbors);
-            currentlyFacing = EAST;
-        case WEST:
-            movedEast(forwardFacing, neighbors);
-            currentlyFacing = WEST;
+        movedSouth(forwardFacing, neighbors);
+        // Set the currentlyFacing back to where it was actually at since it's moving backwards
+        currentlyFacing = NORTH;
+    }
+    else if(currentlyFacing == SOUTH)
+    {
+        movedNorth(forwardFacing, neighbors);
+        currentlyFacing = SOUTH;
+    }
+    else if(currentlyFacing == EAST)
+    {
+        movedWest(forwardFacing, neighbors);
+        currentlyFacing = EAST;
+    }
+    else
+    {
+        movedEast(forwardFacing, neighbors);
+        currentlyFacing = WEST;      
     }
 }
 
@@ -916,11 +929,11 @@ void destroyMaze(Cell *cellToDestroy)
     {
         return;
     }
+    free(cellToDestroy);
     destroyMaze(cellToDestroy->northNeighbor);
     destroyMaze(cellToDestroy->southNeighbor);
     destroyMaze(cellToDestroy->eastNeighbor);
     destroyMaze(cellToDestroy->westNeighbor);
-    free(cellToDestroy);
     return;
 }
 
@@ -1073,7 +1086,7 @@ void set_score(Cell *cell, Set *set, int score)
         return;
     }
     insert(set, thisVector); // mark as visited
-    printf("Inserted x:%d, y: %d into the queue, the score for this is at %d\n", cell->vector.x, cell->vector.y, score);
+    // printf("Inserted x:%d, y: %d into the queue, the score for this is at %d\n", cell->vector.x, cell->vector.y, score);
 
     cell->score = score;
 

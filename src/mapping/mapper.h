@@ -82,6 +82,8 @@ void destroySet(Set *set);
 
 /**********Mapper**********/
 void printMap();
+void smallMaze(Directions *dir);
+void finalMaze(Directions *dir);
 void assignWalls(Directions *dir, bool northWall, bool southWall, bool eastWall, bool westWall);
 void movedForward(int currentlyFacing, Directions* neighbors);
 void movedBackwards(int forwardFacing, Directions* neighbors);
